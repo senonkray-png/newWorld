@@ -1485,6 +1485,65 @@ a {
   color: #f3f6ff;
 }
 
+.nm-chat-dialog-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+.nm-chat-dialog-avatar-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nm-chat-dialog-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: #f4f6f8;
+}
+
+.nm-chat-dialog-avatar-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #f8fbff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: #52648d;
+}
+
+.nm-chat-dialog-main {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.nm-chat-dialog-top,
+.nm-chat-dialog-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.nm-chat-dialog-top strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nm-chat-dialog-top small {
+  color: rgba(235, 242, 255, 0.76);
+  flex-shrink: 0;
+}
+
 .nm-chat-contact:hover {
   background: rgba(255, 255, 255, 0.11);
 }
@@ -1501,6 +1560,12 @@ a {
   color: rgba(235, 242, 255, 0.75);
 }
 
+.nm-chat-contact-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .nm-chat-contact-meta {
   display: flex;
   align-items: center;
@@ -1508,11 +1573,18 @@ a {
 }
 
 .nm-unread-badge {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  padding: 0 5px;
   background: #f86464;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
 }
 
 .nm-messages-contact-row {
@@ -1739,6 +1811,27 @@ a {
 
   .nm-chat-compose-wrap {
     padding: 8px 10px 10px;
+  }
+
+  .nm-chat-dialog-item {
+    border-radius: 11px;
+  }
+
+  .nm-chat-dialog-avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .nm-chat-dialog-top strong {
+    font-size: 0.9rem;
+  }
+
+  .nm-chat-dialog-top small {
+    font-size: 0.72rem;
+  }
+
+  .nm-chat-contact-line {
+    font-size: 0.8rem;
   }
 
   .nm-chat-input {

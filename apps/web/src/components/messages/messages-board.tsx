@@ -355,6 +355,13 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
     contacts.find((item) => item.id === selectedId)?.fullName ??
     '';
   const selectedContact = contacts.find((item) => item.id === selectedId);
+  const contactsById = useMemo(() => {
+    const map = new Map<string, ContactItem>();
+    for (const item of contacts) {
+      map.set(item.id, item);
+    }
+    return map;
+  }, [contacts]);
   const filteredConversations = conversations.filter((item) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
@@ -475,11 +482,13 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
             <div className="nm-messages-list">
               {filteredConversations.map((item) => {
                 const isUnread = !item.isOutgoing && item.createdAt > (lastReadMap.get(item.userId) ?? '');
+                const contact = contactsById.get(item.userId);
+                const avatarText = (item.userName || '?').slice(0, 1).toUpperCase();
                 return (
                   <button
                     key={item.userId}
                     type="button"
-                    className={`nm-chat-contact ${selectedId === item.userId ? 'active' : ''}`}
+                    className={`nm-chat-contact nm-chat-dialog-item ${selectedId === item.userId ? 'active' : ''}`}
                     onClick={() => {
                       setSelectedId(item.userId);
                       if (isMobile) {
@@ -488,12 +497,30 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
                       setStatus('');
                     }}
                   >
-                    <span className="nm-chat-contact-meta">
-                      <strong>{item.userName}</strong>
-                      {isUnread ? <span className="nm-unread-badge" /> : null}
+                    <span className="nm-chat-dialog-avatar-wrap">
+                      {contact?.avatarUrl ? (
+                        <Image
+                          src={contact.avatarUrl}
+                          alt={item.userName || 'avatar'}
+                          width={42}
+                          height={42}
+                          className="nm-chat-dialog-avatar"
+                          unoptimized
+                        />
+                      ) : (
+                        <span className="nm-chat-dialog-avatar nm-chat-dialog-avatar-placeholder">{avatarText}</span>
+                      )}
                     </span>
-                    <span className="nm-chat-contact-line">{item.lastMessage}</span>
-                    <small>{formatDate(item.createdAt, locale)}</small>
+                    <span className="nm-chat-dialog-main">
+                      <span className="nm-chat-dialog-top">
+                        <strong>{item.userName}</strong>
+                        <small>{formatDate(item.createdAt, locale)}</small>
+                      </span>
+                      <span className="nm-chat-dialog-bottom">
+                        <span className="nm-chat-contact-line">{item.lastMessage}</span>
+                        {isUnread ? <span className="nm-unread-badge">1</span> : null}
+                      </span>
+                    </span>
                   </button>
                 );
               })}
