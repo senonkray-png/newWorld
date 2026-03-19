@@ -123,7 +123,9 @@ export function UserActions({ locale }: { locale: Locale }) {
 
   const t = {
     login: locale === 'en' ? 'Sign in / Register' : locale === 'uk' ? 'Вхід / Реєстрація' : 'Вход / Регистрация',
+    loginShort: locale === 'en' ? 'Sign in' : locale === 'uk' ? 'Вхід' : 'Вход',
     admin: locale === 'en' ? 'Admin panel' : locale === 'uk' ? 'Адмін панель' : 'Админ панель',
+    adminShort: locale === 'en' ? 'Admin' : locale === 'uk' ? 'Адмін' : 'Админ',
     profile: locale === 'en' ? 'Profile' : locale === 'uk' ? 'Профіль' : 'Профиль',
     messages: locale === 'en' ? 'Messages' : locale === 'uk' ? 'Повідомлення' : 'Сообщения',
   };
@@ -131,7 +133,8 @@ export function UserActions({ locale }: { locale: Locale }) {
   if (!accessToken) {
     return (
       <Link href={`/${locale}/login`} className="nm-auth-link-btn" aria-label={t.login}>
-        {t.login}
+        <span className="nm-label-desktop">{t.login}</span>
+        <span className="nm-label-mobile">{t.loginShort}</span>
       </Link>
     );
   }
@@ -140,7 +143,8 @@ export function UserActions({ locale }: { locale: Locale }) {
     <div className="nm-auth-user-inline">
       {isAdmin ? (
         <Link href={`/${locale}/admin`} className="nm-auth-link-btn nm-admin-link-btn" aria-label={t.admin}>
-          {t.admin}
+          <span className="nm-label-desktop">{t.admin}</span>
+          <span className="nm-label-mobile">{t.adminShort}</span>
         </Link>
       ) : null}
       <Link href={`/${locale}/messages`} className="nm-user-trigger nm-message-trigger" aria-label={t.messages}>

@@ -254,6 +254,10 @@ a {
   gap: 8px;
 }
 
+.nm-label-mobile {
+  display: none;
+}
+
 .nm-message-trigger {
   position: relative;
 }
@@ -1092,11 +1096,46 @@ a {
   .nm-site-header {
     min-height: 58px;
     padding: 8px 10px;
+    gap: 6px;
   }
 
   .nm-site-title {
     font-size: 0.8rem;
     letter-spacing: 0.06em;
+  }
+
+  .nm-site-controls {
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .nm-auth-user-inline {
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .nm-auth-link-btn {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 0.76rem;
+  }
+
+  .nm-admin-link-btn {
+    padding: 0 9px;
+    font-size: 0.74rem;
+  }
+
+  .nm-lang-trigger,
+  .nm-user-trigger {
+    padding: 8px 9px;
+  }
+
+  .nm-label-desktop {
+    display: none;
+  }
+
+  .nm-label-mobile {
+    display: inline;
   }
 
   .nm-hero {
@@ -1140,6 +1179,21 @@ a {
 
   .nm-team-content {
     padding: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .nm-site-title {
+    display: none;
+  }
+
+  .nm-site-header {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .nm-site-brand {
+    gap: 6px;
   }
 }
 
