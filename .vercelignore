@@ -1,0 +1,6 @@
+# Vercel — exclude from deployment tracking
+WebSite6631044/
+apps/cms/
+**/node_modules/
+**/.next/
+apps/web/supabase/

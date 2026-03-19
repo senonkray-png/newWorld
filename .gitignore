@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+coverage
+.env
+.env.local
+.env.*.local
+apps/cms/.cache
+apps/cms/build
+apps/cms/dist
+apps/cms/.tmp
+.DS_Store

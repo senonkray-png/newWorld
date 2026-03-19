@@ -1,0 +1,162 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+
+import type { Locale } from '@/i18n/config';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+
+export function UserActions({ locale }: { locale: Locale }) {
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const pathname = usePathname();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const seenKey = 'nm_messages_seen_at';
+
+  useEffect(() => {
+    let alive = true;
+
+    async function load() {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token ?? null;
+      if (!alive) return;
+
+      setAccessToken(token);
+    }
+
+    load();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      load();
+    });
+
+    return () => {
+      alive = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  useEffect(() => {
+    if (!accessToken) {
+      setIsAdmin(false);
+      return;
+    }
+
+    let alive = true;
+
+    async function loadRole() {
+      const response = await fetch('/api/profile/me', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!alive) return;
+      if (!response.ok) {
+        setIsAdmin(false);
+        return;
+      }
+
+      const payload = (await response.json()) as { profile?: { role?: string } };
+      setIsAdmin(payload.profile?.role === 'main_admin');
+    }
+
+    loadRole();
+
+    return () => {
+      alive = false;
+    };
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (!accessToken) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const loadUnread = async () => {
+      if (pathname?.includes('/messages')) {
+        try {
+          localStorage.setItem(seenKey, new Date().toISOString());
+        } catch {
+          // ignore
+        }
+        setUnreadCount(0);
+        return;
+      }
+
+      const response = await fetch('/api/messages', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        setUnreadCount(0);
+        return;
+      }
+
+      const payload = (await response.json()) as {
+        conversations?: Array<{ isOutgoing: boolean; createdAt: string }>;
+      };
+
+      let seenAt = '';
+      try {
+        seenAt = localStorage.getItem(seenKey) ?? '';
+      } catch {
+        seenAt = '';
+      }
+
+      const unread = (payload.conversations ?? []).filter(
+        (item) => !item.isOutgoing && (!seenAt || item.createdAt > seenAt),
+      ).length;
+      setUnreadCount(unread);
+    };
+
+    loadUnread();
+    const timer = setInterval(loadUnread, 15000);
+    return () => clearInterval(timer);
+  }, [accessToken, pathname]);
+
+  const t = {
+    login: locale === 'en' ? 'Sign in / Register' : locale === 'uk' ? 'Вхід / Реєстрація' : 'Вход / Регистрация',
+    admin: locale === 'en' ? 'Admin panel' : locale === 'uk' ? 'Адмін панель' : 'Админ панель',
+    profile: locale === 'en' ? 'Profile' : locale === 'uk' ? 'Профіль' : 'Профиль',
+    messages: locale === 'en' ? 'Messages' : locale === 'uk' ? 'Повідомлення' : 'Сообщения',
+  };
+
+  if (!accessToken) {
+    return (
+      <Link href={`/${locale}/login`} className="nm-auth-link-btn" aria-label={t.login}>
+        {t.login}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="nm-auth-user-inline">
+      {isAdmin ? (
+        <Link href={`/${locale}/admin`} className="nm-auth-link-btn nm-admin-link-btn" aria-label={t.admin}>
+          {t.admin}
+        </Link>
+      ) : null}
+      <Link href={`/${locale}/messages`} className="nm-user-trigger nm-message-trigger" aria-label={t.messages}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 6.5a2.5 2.5 0 012.5-2.5h11A2.5 2.5 0 0120 6.5v7A2.5 2.5 0 0117.5 16H10l-4 4v-4H6.5A2.5 2.5 0 014 13.5v-7z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+        </svg>
+        {unreadCount > 0 ? <span className="nm-message-badge">{unreadCount > 99 ? '99+' : unreadCount}</span> : null}
+      </Link>
+      <Link href={`/${locale}/profile`} className="nm-user-trigger nm-user-trigger--auth" aria-label={t.profile}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+        <span className="nm-user-dot" aria-hidden="true" />
+      </Link>
+    </div>
+  );
+}
+

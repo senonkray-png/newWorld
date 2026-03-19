@@ -1,0 +1,17 @@
+- [x] Verify that the copilot-instructions.md file in the .github directory is created.
+- [x] Clarify Project Requirements
+- [x] Scaffold the Project
+- [x] Customize the Project
+- [x] Install Required Extensions
+- [x] Compile the Project
+- [x] Create and Run Task
+- [x] Launch the Project
+- [x] Ensure Documentation is Complete
+
+- Stack: Next.js frontend, Strapi-oriented CMS workspace, PostgreSQL.
+- Localization baseline: RU, UKR, ENG.
+- Current scope: workspace scaffold, starter frontend, CMS bootstrap docs.
+- No extensions installed because none are strictly required for this scaffold.
+- Frontend checks passed: typecheck, lint, production build.
+- VS Code task created: Run web app.
+- Current local run: Next.js dev server is active on port 3001 because port 3000 was already occupied.

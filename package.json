@@ -1,0 +1,19 @@
+{
+  "name": "novyi-mir",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @novyi-mir/web",
+    "dev:web": "npm run dev --workspace @novyi-mir/web",
+    "build:web": "npm run build --workspace @novyi-mir/web",
+    "lint:web": "npm run lint --workspace @novyi-mir/web",
+    "check:web": "npm run typecheck --workspace @novyi-mir/web",
+    "clean:web": "rm -rf apps/web/.next"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

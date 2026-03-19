@@ -1,0 +1,9 @@
+{
+  "name": "@novyi-mir/cms",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "echo 'Strapi bootstrap is documented in apps/cms/README.md' && exit 1",
+    "build": "echo 'CMS is not initialized yet' && exit 1"
+  }
+}
