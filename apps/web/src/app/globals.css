@@ -1565,6 +1565,21 @@ a {
   align-items: center;
 }
 
+.nm-chat-back-btn {
+  border: 1px solid #c8d4e8;
+  border-radius: 999px;
+  background: #f1f5fe;
+  color: #324d7d;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.nm-chat-back-btn:hover {
+  background: #e7eefc;
+}
+
 .nm-chat-thread-user h3 {
   margin: 0;
 }
@@ -1692,10 +1707,42 @@ a {
 
   .nm-chat-shell {
     grid-template-columns: 1fr;
+    min-height: 78vh;
   }
 
   .nm-chat-sidebar {
-    max-height: 42vh;
+    max-height: none;
+    min-height: 78vh;
+  }
+
+  .nm-chat-thread {
+    min-height: 78vh;
+  }
+
+  .nm-chat-pane-hidden {
+    display: none;
+  }
+
+  .nm-chat-thread-head {
+    padding: 10px 12px;
+  }
+
+  .nm-chat-thread-user {
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .nm-messages-bubbles {
+    padding: 12px;
+  }
+
+  .nm-chat-compose-wrap {
+    padding: 8px 10px 10px;
+  }
+
+  .nm-chat-input {
+    min-height: 56px;
   }
 }
 

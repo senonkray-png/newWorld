@@ -129,6 +129,8 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
   const [sending, setSending] = useState(false);
   const [draft, setDraft] = useState('');
   const [lastReadMap, setLastReadMap] = useState<Map<string, string>>(new Map());
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
   const seenKey = 'nm_messages_seen_at';
 
   const selectedFromUrl = (searchParams.get('user') ?? '').trim();
@@ -245,6 +247,30 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const query = window.matchMedia('(max-width: 900px)');
+    const apply = () => {
+      setIsMobile(query.matches);
+      if (!query.matches) {
+        setMobileView('chat');
+      } else if (!selectedId) {
+        setMobileView('list');
+      }
+    };
+
+    apply();
+    query.addEventListener('change', apply);
+    return () => query.removeEventListener('change', apply);
+  }, [selectedId]);
+
+  useEffect(() => {
+    if (isMobile && selectedId) {
+      setMobileView('chat');
+    }
+  }, [isMobile, selectedId]);
+
+  useEffect(() => {
     let alive = true;
 
     try {
@@ -329,9 +355,17 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
     contacts.find((item) => item.id === selectedId)?.fullName ??
     '';
   const selectedContact = contacts.find((item) => item.id === selectedId);
+  const filteredConversations = conversations.filter((item) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return item.userName.toLowerCase().includes(q) || item.lastMessage.toLowerCase().includes(q);
+  });
 
   const onSearch = async (value: string) => {
     setSearch(value);
+    if (isMobile) {
+      return;
+    }
     if (!token) {
       return;
     }
@@ -383,7 +417,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
   return (
     <main className="nm-register-page">
       <section className="nm-chat-shell nm-reveal">
-        <aside className="nm-chat-sidebar">
+        <aside className={`nm-chat-sidebar${isMobile && mobileView === 'chat' ? ' nm-chat-pane-hidden' : ''}`}>
           <header className="nm-chat-sidebar-head">
             <h1>{t.title}</h1>
             <p>{t.subtitle}</p>
@@ -406,7 +440,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
             </button>
           </div>
 
-          {filtersOpen ? (
+          {!isMobile && filtersOpen ? (
             <div className="nm-chat-filters-panel">
               <label className="nm-admin-field">
                 <span>{t.role}</span>
@@ -437,9 +471,9 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
 
           <div className="nm-chat-scroll">
             <h3 className="nm-chat-list-title">{t.chats}</h3>
-            {conversations.length === 0 ? <p className="nm-chat-empty-label">{t.noConversations}</p> : null}
+            {filteredConversations.length === 0 ? <p className="nm-chat-empty-label">{t.noConversations}</p> : null}
             <div className="nm-messages-list">
-              {conversations.map((item) => {
+              {filteredConversations.map((item) => {
                 const isUnread = !item.isOutgoing && item.createdAt > (lastReadMap.get(item.userId) ?? '');
                 return (
                   <button
@@ -448,6 +482,9 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
                     className={`nm-chat-contact ${selectedId === item.userId ? 'active' : ''}`}
                     onClick={() => {
                       setSelectedId(item.userId);
+                      if (isMobile) {
+                        setMobileView('chat');
+                      }
                       setStatus('');
                     }}
                   >
@@ -462,48 +499,61 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
               })}
             </div>
 
-            <h3 className="nm-chat-list-title">{t.contacts}</h3>
-            <div className="nm-messages-list">
-              {contacts.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`nm-chat-contact ${selectedId === item.id ? 'active' : ''}`}
-                  onClick={() => {
-                    setSelectedId(item.id);
-                    setStatus('');
-                  }}
-                >
-                  <span className="nm-messages-contact-row">
-                    {item.avatarUrl ? (
-                      <Image
-                        src={item.avatarUrl}
-                        alt={item.fullName || 'avatar'}
-                        width={38}
-                        height={38}
-                        className="nm-messages-contact-avatar"
-                        unoptimized
-                      />
-                    ) : (
-                      <span className="nm-messages-contact-avatar nm-messages-contact-avatar-placeholder">
-                        {(item.fullName || item.email || '?').slice(0, 1).toUpperCase()}
+            {!isMobile ? (
+              <>
+                <h3 className="nm-chat-list-title">{t.contacts}</h3>
+                <div className="nm-messages-list">
+                  {contacts.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`nm-chat-contact ${selectedId === item.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedId(item.id);
+                        setStatus('');
+                      }}
+                    >
+                      <span className="nm-messages-contact-row">
+                        {item.avatarUrl ? (
+                          <Image
+                            src={item.avatarUrl}
+                            alt={item.fullName || 'avatar'}
+                            width={38}
+                            height={38}
+                            className="nm-messages-contact-avatar"
+                            unoptimized
+                          />
+                        ) : (
+                          <span className="nm-messages-contact-avatar nm-messages-contact-avatar-placeholder">
+                            {(item.fullName || item.email || '?').slice(0, 1).toUpperCase()}
+                          </span>
+                        )}
+                        <span className="nm-messages-contact-text">
+                          <strong>{item.fullName}</strong>
+                          <span>{item.role}</span>
+                          <small>{item.city || item.email}</small>
+                        </span>
                       </span>
-                    )}
-                    <span className="nm-messages-contact-text">
-                      <strong>{item.fullName}</strong>
-                      <span>{item.role}</span>
-                      <small>{item.city || item.email}</small>
-                    </span>
-                  </span>
-                </button>
-              ))}
-            </div>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
           </div>
         </aside>
 
-        <section className="nm-chat-thread">
+        <section className={`nm-chat-thread${isMobile && mobileView === 'list' ? ' nm-chat-pane-hidden' : ''}`}>
           <header className="nm-chat-thread-head">
             <div className="nm-chat-thread-user">
+              {isMobile ? (
+                <button
+                  type="button"
+                  className="nm-chat-back-btn"
+                  onClick={() => setMobileView('list')}
+                >
+                  ← {t.chats}
+                </button>
+              ) : null}
               {selectedContact?.avatarUrl ? (
                 <Image
                   src={selectedContact.avatarUrl}
