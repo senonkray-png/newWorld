@@ -293,6 +293,7 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
 
     const body = new FormData();
     body.append('file', file);
+    body.append('folder', 'avatars');
     setUploadingAvatar(true);
     setStatus('');
 

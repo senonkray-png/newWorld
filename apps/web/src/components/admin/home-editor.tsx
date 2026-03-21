@@ -125,6 +125,7 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
     setUploadingImage(file.name);
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('folder', 'home');
 
     const response = await fetch('/api/upload', {
       method: 'POST',
