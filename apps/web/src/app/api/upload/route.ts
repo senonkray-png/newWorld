@@ -12,8 +12,15 @@ function sanitizeSegment(value: string, fallback: string) {
   return cleaned || fallback;
 }
 
-function sanitizeFilename(value: string) {
-  return value.replace(/[^a-zA-Z0-9._-]/g, '-');
+function buildSafeFilename(value: string) {
+  const normalized = value.trim();
+  const lastDot = normalized.lastIndexOf('.');
+  const hasExtension = lastDot > 0 && lastDot < normalized.length - 1;
+  const rawBase = hasExtension ? normalized.slice(0, lastDot) : normalized;
+  const rawExt = hasExtension ? normalized.slice(lastDot + 1).toLowerCase() : '';
+  const base = sanitizeSegment(rawBase, 'image');
+  const ext = rawExt.replace(/[^a-z0-9]/g, '');
+  return ext ? `${base}.${ext}` : base;
 }
 
 function getLocalUploadDirs(folder: string) {
@@ -27,6 +34,8 @@ function getLocalUploadDirs(folder: string) {
 async function uploadToSupabase(file: File, folder: string, filename: string) {
   const supabase = getSupabaseServiceClient();
   const storage = supabase.storage;
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
 
   const { data: buckets, error: listError } = await storage.listBuckets();
   if (listError) {
@@ -45,7 +54,7 @@ async function uploadToSupabase(file: File, folder: string, filename: string) {
   }
 
   const objectPath = `${folder}/${filename}`;
-  const { error: uploadError } = await storage.from(STORAGE_BUCKET).upload(objectPath, file, {
+  const { error: uploadError } = await storage.from(STORAGE_BUCKET).upload(objectPath, buffer, {
     upsert: false,
     contentType: file.type || 'application/octet-stream',
   });
@@ -93,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     const timestamp = Date.now();
-    const filename = `${timestamp}-${sanitizeFilename(sanitizeSegment(file.name, 'image'))}`;
+  const filename = `${timestamp}-${buildSafeFilename(file.name)}`;
 
     let url = '';
     try {
