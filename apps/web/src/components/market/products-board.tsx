@@ -21,12 +21,20 @@ type ProductItem = {
 };
 
 type ViewerRole = 'Пользователь' | 'Продавец' | 'Поставщик услуг' | '';
+type BoardMode = 'catalog' | 'cabinet';
+type ModerationAction = 'warn' | 'remove' | 'restore';
+type ReasonDialogState = {
+  itemId: string;
+  action: 'warn' | 'remove';
+} | null;
 
 function textByLocale(locale: Locale) {
   if (locale === 'en') {
     return {
       title: 'Products',
       subtitle: 'Public product feed available to all users.',
+      cabinetTitle: 'My products',
+      cabinetSubtitle: 'Manage your products here, including hidden ones.',
       add: 'Add product',
       close: 'Close',
       save: 'Publish',
@@ -49,6 +57,14 @@ function textByLocale(locale: Locale) {
       lockedByModeration: 'This item was removed by moderation. Editing is locked, only deletion is available.',
       sellerOnly: 'Only users with Seller role can add products.',
       loginRequired: 'Please log in to add a product.',
+      pay: 'Pai',
+      warnTip: 'Warn seller',
+      removeTip: 'Hide product',
+      restoreTip: 'Restore product',
+      reasonTitle: 'Select a reason',
+      customReason: 'Custom reason',
+      apply: 'Apply',
+      uploadHint: 'Owner management is available in the profile cabinet.',
     };
   }
 
@@ -56,6 +72,8 @@ function textByLocale(locale: Locale) {
     return {
       title: 'Товари',
       subtitle: 'Публічна стрічка товарів для всіх користувачів.',
+      cabinetTitle: 'Мої товари',
+      cabinetSubtitle: 'Тут можна керувати своїми товарами, зокрема прихованими.',
       add: 'Додати товар',
       close: 'Закрити',
       save: 'Опублікувати',
@@ -78,12 +96,22 @@ function textByLocale(locale: Locale) {
       lockedByModeration: 'Товар знято модератором. Редагування заблоковано, доступне лише видалення.',
       sellerOnly: 'Додавати товари можуть лише користувачі з роллю Продавець.',
       loginRequired: 'Увійдіть, щоб додати товар.',
+      pay: 'Пай',
+      warnTip: 'Попередити продавця',
+      removeTip: 'Приховати товар',
+      restoreTip: 'Відновити товар',
+      reasonTitle: 'Оберіть причину',
+      customReason: 'Своя причина',
+      apply: 'Застосувати',
+      uploadHint: 'Керування власними товарами доступне в кабінеті профілю.',
     };
   }
 
   return {
     title: 'Товары',
     subtitle: 'Публичная лента товаров для всех пользователей.',
+    cabinetTitle: 'Мои товары',
+    cabinetSubtitle: 'Здесь можно управлять своими товарами, включая скрытые.',
     add: 'Добавить товар',
     close: 'Закрыть',
     save: 'Опубликовать',
@@ -106,10 +134,36 @@ function textByLocale(locale: Locale) {
     lockedByModeration: 'Товар снят модератором. Редактирование заблокировано, доступно только удаление.',
     sellerOnly: 'Добавлять товары могут только пользователи с ролью Продавец.',
     loginRequired: 'Войдите, чтобы добавить товар.',
+    pay: 'Пай',
+    warnTip: 'Предупредить продавца',
+    removeTip: 'Скрыть товар',
+    restoreTip: 'Восстановить товар',
+    reasonTitle: 'Выберите причину',
+    customReason: 'Своя причина',
+    apply: 'Применить',
+    uploadHint: 'Управление своими товарами доступно в кабинете профиля.',
   };
 }
 
-export function ProductsBoard({ locale }: { locale: Locale }) {
+function getReasonPresets(locale: Locale, action: 'warn' | 'remove') {
+  if (locale === 'en') {
+    return action === 'warn'
+      ? ['Clarify description', 'Wrong category', 'Contact details in text']
+      : ['Prohibited product', 'Spam or duplicate', 'Misleading description'];
+  }
+
+  if (locale === 'uk') {
+    return action === 'warn'
+      ? ['Уточніть опис', 'Невірна категорія', 'Контакти в тексті']
+      : ['Заборонений товар', 'Спам або дубль', 'Опис вводить в оману'];
+  }
+
+  return action === 'warn'
+    ? ['Уточните описание', 'Неверная категория', 'Контакты в тексте']
+    : ['Запрещенный товар', 'Спам или дубль', 'Описание вводит в заблуждение'];
+}
+
+export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mode?: BoardMode }) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const t = useMemo(() => textByLocale(locale), [locale]);
 
@@ -125,6 +179,8 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string>('');
   const [actionBusyId, setActionBusyId] = useState<string>('');
+  const [reasonDialog, setReasonDialog] = useState<ReasonDialogState>(null);
+  const [customReason, setCustomReason] = useState('');
   const [form, setForm] = useState({
     imageUrl: '',
     title: '',
@@ -134,7 +190,7 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
-    const query = token ? '?includeMine=1' : '';
+    const query = mode === 'cabinet' && token ? '?includeMine=1' : '';
     const response = await fetch(`/api/products${query}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
@@ -146,9 +202,16 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
     }
 
     const payload = (await response.json()) as { products?: ProductItem[] };
-    setItems(payload.products ?? []);
+    const nextItems = (payload.products ?? []).filter((item) => {
+      if (mode === 'cabinet') {
+        return item.sellerId === viewerId;
+      }
+
+      return !item.isRemovedByAdmin;
+    });
+    setItems(nextItems);
     setLoading(false);
-  }, [token]);
+  }, [mode, token, viewerId]);
 
   const loadViewer = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
@@ -214,6 +277,12 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
     setModalOpen(true);
   };
 
+  const closeEditor = () => {
+    setModalOpen(false);
+    setEditingId('');
+    setForm({ imageUrl: '', title: '', description: '', price: '' });
+  };
+
   const submit = async () => {
     if (!token) {
       return;
@@ -244,9 +313,7 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
       return;
     }
 
-    setModalOpen(false);
-    setEditingId('');
-    setForm({ imageUrl: '', title: '', description: '', price: '' });
+    closeEditor();
     setSaving(false);
     setStatus('');
     await loadProducts();
@@ -290,19 +357,8 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
     await loadProducts();
   };
 
-  const moderate = async (itemId: string, action: 'warn' | 'remove' | 'restore') => {
+  const moderate = async (itemId: string, action: ModerationAction, reason = '') => {
     if (!token) return;
-    let reason = '';
-
-    if (action === 'warn') {
-      reason = window.prompt(t.warningPrompt, '')?.trim() ?? '';
-      if (!reason) return;
-    }
-
-    if (action === 'remove') {
-      reason = window.prompt(t.removePrompt, '')?.trim() ?? '';
-      if (!reason) return;
-    }
 
     setActionBusyId(itemId);
     const response = await fetch(`/api/products/${itemId}/moderation`, {
@@ -324,20 +380,48 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
     await loadProducts();
   };
 
-  return (
-    <main className="nm-register-page">
-      <section className="nm-register-card nm-reveal">
-        <h1>{t.title}</h1>
-        <p>{t.subtitle}</p>
-        <div className="nm-admin-actions">
-          <button type="button" className="nm-btn nm-btn-primary" onClick={openModal}>
-            {t.add}
-          </button>
-        </div>
-        {status ? <p className="nm-admin-status">{status}</p> : null}
-      </section>
+  const openReasonDialog = (itemId: string, action: 'warn' | 'remove') => {
+    setCustomReason('');
+    setReasonDialog({ itemId, action });
+  };
 
-      <section className="nm-register-card nm-reveal">
+  const applyReason = async (reason: string) => {
+    if (!reasonDialog) return;
+    const value = reason.trim();
+    if (!value) return;
+    await moderate(reasonDialog.itemId, reasonDialog.action, value);
+    setReasonDialog(null);
+    setCustomReason('');
+  };
+
+  const content = (
+    <>
+      {mode === 'catalog' ? (
+        <section className="nm-register-card nm-reveal">
+          <h1>{t.title}</h1>
+          <p>{t.subtitle}</p>
+          <div className="nm-admin-actions">
+            <button type="button" className="nm-btn nm-btn-primary" onClick={openModal}>
+              {t.add}
+            </button>
+          </div>
+          {status ? <p className="nm-admin-status">{status}</p> : <p className="nm-admin-hint">{t.uploadHint}</p>}
+        </section>
+      ) : null}
+
+      <section className={mode === 'catalog' ? 'nm-register-card nm-reveal' : 'nm-admin-card nm-reveal'}>
+        {mode === 'cabinet' ? (
+          <div className="nm-market-board-head">
+            <div>
+              <h3>{t.cabinetTitle}</h3>
+              <p>{t.cabinetSubtitle}</p>
+            </div>
+            <button type="button" className="nm-btn nm-btn-primary" onClick={openModal}>
+              {t.add}
+            </button>
+          </div>
+        ) : null}
+        {mode === 'cabinet' && status ? <p className="nm-admin-status">{status}</p> : null}
         <div className="nm-market-grid">
           {!loading && items.length === 0 ? <p>{t.noProducts}</p> : null}
           {items.map((item) => (
@@ -352,16 +436,18 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
                   unoptimized
                 />
               ) : null}
-              <h3>{item.title}</h3>
+              <div className="nm-market-card-head">
+                <h3>{item.title}</h3>
+                <strong className="nm-market-price">{item.price.toFixed(2)} {t.pay}</strong>
+              </div>
               <p>{item.description}</p>
-              <p><strong>{item.price.toFixed(2)}</strong></p>
-              <p><small>{item.sellerName}</small></p>
+              <p className="nm-market-subtle"><small>{item.sellerName}</small></p>
               {item.isRemovedByAdmin ? (
                 <p className="nm-admin-status">
                   {t.removedByAdmin}{item.removedReason ? `: ${item.removedReason}` : ''}
                 </p>
               ) : null}
-              {token && item.sellerId && item.sellerId !== viewerId ? (
+              {mode === 'catalog' && token && item.sellerId && item.sellerId !== viewerId ? (
                 <div className="nm-market-card-actions">
                   <Link
                     href={`/${locale}/messages?user=${encodeURIComponent(item.sellerId)}&ref=${encodeURIComponent(`product:${item.id}:${item.title}`)}`}
@@ -371,7 +457,7 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
                   </Link>
                 </div>
               ) : null}
-              {item.sellerId === viewerId ? (
+              {mode === 'cabinet' && item.sellerId === viewerId ? (
                 <div className="nm-market-card-actions">
                   {!item.isRemovedByAdmin ? (
                     <button type="button" className="nm-btn nm-btn-secondary nm-btn-sm" onClick={() => editItem(item)}>
@@ -388,20 +474,38 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
                   </button>
                 </div>
               ) : null}
-              {isAdmin ? (
+              {mode === 'catalog' && isAdmin ? (
                 <div className="nm-market-card-actions">
                   {!item.isRemovedByAdmin ? (
                     <>
-                      <button type="button" className="nm-btn nm-btn-secondary nm-btn-sm" onClick={() => moderate(item.id, 'warn')}>
-                        {t.warning}
+                      <button
+                        type="button"
+                        className="nm-icon-btn"
+                        title={t.warnTip}
+                        aria-label={t.warnTip}
+                        onClick={() => openReasonDialog(item.id, 'warn')}
+                      >
+                        !
                       </button>
-                      <button type="button" className="nm-btn nm-btn-secondary nm-btn-sm" onClick={() => moderate(item.id, 'remove')}>
-                        {t.remove}
+                      <button
+                        type="button"
+                        className="nm-icon-btn"
+                        title={t.removeTip}
+                        aria-label={t.removeTip}
+                        onClick={() => openReasonDialog(item.id, 'remove')}
+                      >
+                        🗑
                       </button>
                     </>
                   ) : (
-                    <button type="button" className="nm-btn nm-btn-secondary nm-btn-sm" onClick={() => moderate(item.id, 'restore')}>
-                      {t.restore}
+                    <button
+                      type="button"
+                      className="nm-icon-btn"
+                      title={t.restoreTip}
+                      aria-label={t.restoreTip}
+                      onClick={() => moderate(item.id, 'restore')}
+                    >
+                      ↺
                     </button>
                   )}
                 </div>
@@ -412,7 +516,7 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
       </section>
 
       {modalOpen ? (
-        <div className="nm-modal-backdrop" onClick={() => setModalOpen(false)}>
+        <div className="nm-modal-backdrop" onClick={closeEditor}>
           <div className="nm-modal" onClick={(event) => event.stopPropagation()}>
             <h3>{editingId ? t.edit : t.add}</h3>
             <label className="nm-admin-field"><span>{t.image}</span><input value={form.imageUrl} onChange={(e) => setForm((p) => ({ ...p, imageUrl: e.target.value }))} /></label>
@@ -421,21 +525,36 @@ export function ProductsBoard({ locale }: { locale: Locale }) {
             <label className="nm-admin-field"><span>{t.price}</span><input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))} /></label>
             <div className="nm-admin-actions">
               <button type="button" className="nm-btn nm-btn-primary" onClick={submit} disabled={saving}>{saving ? t.saving : editingId ? t.update : t.save}</button>
-              <button
-                type="button"
-                className="nm-btn nm-btn-secondary"
-                onClick={() => {
-                  setModalOpen(false);
-                  setEditingId('');
-                }}
-                disabled={saving}
-              >
-                {t.close}
-              </button>
+              <button type="button" className="nm-btn nm-btn-secondary" onClick={closeEditor} disabled={saving}>{t.close}</button>
             </div>
           </div>
         </div>
       ) : null}
-    </main>
+
+      {reasonDialog ? (
+        <div className="nm-modal-backdrop" onClick={() => setReasonDialog(null)}>
+          <div className="nm-modal" onClick={(event) => event.stopPropagation()}>
+            <h3>{t.reasonTitle}</h3>
+            <div className="nm-reason-grid">
+              {getReasonPresets(locale, reasonDialog.action).map((reason) => (
+                <button key={reason} type="button" className="nm-btn nm-btn-secondary" onClick={() => applyReason(reason)}>
+                  {reason}
+                </button>
+              ))}
+            </div>
+            <label className="nm-admin-field">
+              <span>{t.customReason}</span>
+              <textarea rows={3} value={customReason} onChange={(event) => setCustomReason(event.target.value)} />
+            </label>
+            <div className="nm-admin-actions">
+              <button type="button" className="nm-btn nm-btn-primary" onClick={() => applyReason(customReason)}>{t.apply}</button>
+              <button type="button" className="nm-btn nm-btn-secondary" onClick={() => setReasonDialog(null)}>{t.close}</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
+
+  return mode === 'catalog' ? <main className="nm-register-page">{content}</main> : content;
 }

@@ -913,12 +913,42 @@ a {
   padding: 12px;
 }
 
+.nm-market-card-head {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
 .nm-market-card h3 {
   margin: 10px 0 8px;
 }
 
 .nm-market-card p {
   margin: 0 0 8px;
+}
+
+.nm-market-price {
+  white-space: nowrap;
+  color: #2f5d46;
+}
+
+.nm-market-subtle {
+  color: var(--nm-soft-ink);
+}
+
+.nm-market-board-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.nm-market-board-head h3,
+.nm-market-board-head p {
+  margin: 0;
 }
 
 .nm-market-image {
@@ -1818,6 +1848,32 @@ a {
   flex-wrap: wrap;
 }
 
+.nm-icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--nm-line);
+  border-radius: 10px;
+  background: #f6f8fb;
+  color: var(--nm-ink);
+  font: inherit;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.nm-icon-btn:hover {
+  background: #eaf0f7;
+}
+
+.nm-reason-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 12px;
+}
+
 /* ── Responsive additions ───────────────────────────────────────── */
 @media (max-width: 900px) {
   .nm-catalog-filters {
@@ -1871,6 +1927,10 @@ a {
 
   .nm-chat-dialog-top strong {
     font-size: 0.9rem;
+  }
+
+  .nm-reason-grid {
+    grid-template-columns: 1fr;
   }
 
   .nm-chat-dialog-top small {

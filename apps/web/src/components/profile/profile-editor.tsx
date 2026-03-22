@@ -4,17 +4,11 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ProductsBoard } from '@/components/market/products-board';
+import { ServicesBoard } from '@/components/market/services-board';
 import type { Locale } from '@/i18n/config';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import type { UserRoleRu } from '@/lib/app-user-store';
-
-type ProductItem = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-};
 
 type ProfileFormState = {
   email: string;
@@ -158,25 +152,8 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
   const [status, setStatus] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [form, setForm] = useState<ProfileFormState>(initialState);
-  const [sellerProducts, setSellerProducts] = useState<ProductItem[]>([]);
 
   const signOutLabel = locale === 'en' ? 'Sign out' : locale === 'uk' ? 'Вийти' : 'Выйти';
-
-  const loadSellerProducts = useCallback(async (sellerId: string, role: UserRoleRu) => {
-    if (role !== 'Продавец') {
-      setSellerProducts([]);
-      return;
-    }
-
-    const response = await fetch(`/api/products?sellerId=${encodeURIComponent(sellerId)}`);
-    if (!response.ok) {
-      setSellerProducts([]);
-      return;
-    }
-
-    const payload = (await response.json()) as { products?: ProductItem[] };
-    setSellerProducts(payload.products ?? []);
-  }, []);
 
   const loadProfile = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
@@ -241,11 +218,10 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
       };
 
       setForm(nextForm);
-      await loadSellerProducts(sessionUser?.id ?? '', nextForm.role);
     }
 
     setLoading(false);
-  }, [loadSellerProducts, supabase.auth]);
+  }, [supabase.auth]);
 
   useEffect(() => {
     loadProfile();
@@ -443,22 +419,8 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
               <InfoRow label="Интересы" value={form.interests} />
               <InfoRow label="О себе" value={form.aboutMe} />
             </div>
-            {form.role === 'Продавец' ? (
-              <div className="nm-admin-card">
-                <h3>{t.sellerProducts}</h3>
-                <div className="nm-market-grid">
-                  {sellerProducts.length === 0 ? <p>{t.noProducts}</p> : null}
-                  {sellerProducts.map((product) => (
-                    <article key={product.id} className="nm-market-card">
-                      {product.imageUrl ? <Image src={product.imageUrl} alt={product.title} width={640} height={480} className="nm-market-image" unoptimized /> : null}
-                      <h3>{product.title}</h3>
-                      <p>{product.description}</p>
-                      <p><strong>{product.price.toFixed(2)}</strong></p>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            ) : null}
+            {form.role === 'Продавец' ? <ProductsBoard locale={locale} mode="cabinet" /> : null}
+            {form.role === 'Поставщик услуг' ? <ServicesBoard locale={locale} mode="cabinet" /> : null}
           </div>
         )}
 

@@ -10,6 +10,7 @@ export type AdItem = {
   title: string;
   description: string;
   price: number;
+  imageUrl: string;
   createdAt: string;
   authorName: string;
   isRemovedByAdmin: boolean;
@@ -25,6 +26,7 @@ type RawAd = {
   title: string;
   description: string;
   price: number | string | null;
+  image_url: string | null;
   created_at: string;
   is_removed_by_admin: boolean | null;
   removed_reason: string | null;
@@ -60,6 +62,7 @@ function mapAd(row: RawAd, authorName = 'Пользователь'): AdItem {
     title: cleanText(row.title),
     description: cleanText(row.description),
     price: parsePrice(row.price),
+    imageUrl: cleanText(row.image_url),
     createdAt: row.created_at,
     authorName,
     isRemovedByAdmin: Boolean(row.is_removed_by_admin),
@@ -140,6 +143,7 @@ export async function createAd(userId: string, value: unknown): Promise<AdItem> 
   const title = cleanText(input.title);
   const description = cleanText(input.description);
   const price = parsePrice(input.price);
+  const imageUrl = cleanText(input.imageUrl);
 
   if (!title || !description || price < 0) {
     throw new Error('title, description and non-negative price are required');
@@ -165,6 +169,7 @@ export async function createAd(userId: string, value: unknown): Promise<AdItem> 
       title,
       description,
       price,
+      image_url: imageUrl || null,
     })
     .select('*')
     .single();
@@ -191,6 +196,7 @@ export async function updateAd(
   const title = cleanText(input.title);
   const description = cleanText(input.description);
   const price = parsePrice(input.price);
+  const imageUrl = cleanText(input.imageUrl);
 
   if (!title || !description || price < 0) {
     throw new Error('title, description and non-negative price are required');
@@ -226,6 +232,7 @@ export async function updateAd(
       title,
       description,
       price,
+      image_url: imageUrl || null,
     })
     .eq('id', adId)
     .select('*')
