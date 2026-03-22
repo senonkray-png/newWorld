@@ -1,9 +1,9 @@
 import { getSupabaseServiceClient } from '@/lib/supabase-service';
 
-export const accountIntentValues = ['seller', 'service_provider', 'both'] as const;
+export const accountIntentValues = ['provider', 'member'] as const;
 export type AccountIntent = (typeof accountIntentValues)[number];
 
-export const userRoleValues = ['member', 'seller', 'service_provider', 'organizer', 'main_admin'] as const;
+export const userRoleValues = ['member', 'provider', 'organizer', 'main_admin'] as const;
 export type UserRole = (typeof userRoleValues)[number];
 
 export type UserProfile = {
@@ -78,10 +78,22 @@ function cleanInterests(value: unknown): string[] {
 }
 
 function normalizeIntent(value: unknown): AccountIntent {
-  return accountIntentValues.includes(value as AccountIntent) ? (value as AccountIntent) : 'seller';
+  if (value === 'seller' || value === 'service_provider' || value === 'both' || value === 'provider') {
+    return 'provider';
+  }
+
+  return 'member';
 }
 
 function normalizeRole(value: unknown, fallback: UserRole = 'member'): UserRole {
+  if (value === 'seller' || value === 'service_provider' || value === 'provider') {
+    return 'provider';
+  }
+
+  if (value === 'member') {
+    return 'member';
+  }
+
   return userRoleValues.includes(value as UserRole) ? (value as UserRole) : fallback;
 }
 
@@ -118,11 +130,11 @@ export async function getProfileByUserId(userId: string): Promise<UserProfile | 
 }
 
 function roleFromIntent(intent: AccountIntent): UserRole {
-  if (intent === 'service_provider') {
-    return 'service_provider';
+  if (intent === 'provider') {
+    return 'provider';
   }
 
-  return 'seller';
+  return 'member';
 }
 
 export async function upsertProfile(
@@ -253,8 +265,14 @@ export async function searchProfilesWithRole(
     request = request.contains('interests', [cleanInterest]);
   }
 
-  if (userRoleValues.includes(cleanRole as UserRole) && cleanRole !== 'main_admin') {
-    request = request.eq('role', cleanRole);
+  if (cleanRole && cleanRole !== 'main_admin') {
+    const normalizedRole = normalizeRole(cleanRole);
+
+    if (normalizedRole === 'provider') {
+      request = request.in('role', ['provider', 'seller', 'service_provider']);
+    } else if (normalizedRole === 'member') {
+      request = request.in('role', ['member']);
+    }
   }
 
   const { data, error } = await request;

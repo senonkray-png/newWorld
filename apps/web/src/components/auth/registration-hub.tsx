@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import type { Locale } from '@/i18n/config';
 
-type UserRole = 'member' | 'seller' | 'service_provider' | 'organizer' | 'main_admin';
-type AccountIntent = 'seller' | 'service_provider' | 'both';
+type UserRole = 'member' | 'provider' | 'organizer' | 'main_admin';
+type AccountIntent = 'provider' | 'member';
 
 type UserProfile = {
   fullName: string;
@@ -35,7 +35,7 @@ type SearchResult = {
 const initialForm: UserProfile = {
   fullName: '',
   displayName: '',
-  accountIntent: 'seller',
+  accountIntent: 'provider',
   businessInfo: '',
   websiteUrl: '',
   phonePersonal: '',
@@ -386,9 +386,8 @@ export function RegistrationHub({ locale }: { locale: Locale }) {
                 }))
               }
             >
-              <option value="seller">Продавец товаров</option>
-              <option value="service_provider">Поставщик услуг</option>
-              <option value="both">И товары, и услуги</option>
+              <option value="provider">Поставщик</option>
+              <option value="member">Потребитель</option>
             </select>
           </label>
 
@@ -480,7 +479,7 @@ export function RegistrationHub({ locale }: { locale: Locale }) {
               <h3>{profile.displayName || 'Без имени'}</h3>
               <p>{profile.businessInfo || 'Описание пока не заполнено'}</p>
               <p><strong>Интересы:</strong> {profile.interests.join(', ') || 'нет'}</p>
-              <p><strong>Роль:</strong> {profile.role === 'main_admin' ? text.roleMainAdmin : profile.role}</p>
+              <p><strong>Роль:</strong> {profile.role === 'main_admin' ? text.roleMainAdmin : profile.role === 'provider' ? 'Поставщик' : 'Потребитель'}</p>
               {profile.websiteUrl ? (
                 <a href={profile.websiteUrl} target="_blank" rel="noreferrer">
                   {profile.websiteUrl}

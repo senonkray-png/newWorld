@@ -8,9 +8,8 @@ import { userRoleValues } from '@/lib/profile-store';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 const ROLE_LABELS: Record<UserRole, string> = {
-  member: 'Участник',
-  seller: 'Продавец',
-  service_provider: 'Поставщик услуг',
+  member: 'Потребитель',
+  provider: 'Поставщик',
   organizer: 'Организатор',
   main_admin: 'Главный админ',
 };

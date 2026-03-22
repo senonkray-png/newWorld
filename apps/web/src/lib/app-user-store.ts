@@ -1,7 +1,10 @@
 import { getSupabaseServiceClient } from '@/lib/supabase-service';
 
-export const userRoleRuValues = ['Пользователь', 'Продавец', 'Поставщик услуг'] as const;
+export const userRoleRuValues = ['Потребитель', 'Поставщик'] as const;
 export type UserRoleRu = (typeof userRoleRuValues)[number];
+
+const legacyConsumerRoles = ['Потребитель', 'Пользователь'] as const;
+const legacyProviderRoles = ['Поставщик', 'Продавец', 'Поставщик услуг'] as const;
 
 export type AppUserProfile = {
   id: string;
@@ -106,7 +109,15 @@ function cleanInterests(value: unknown): string[] {
 }
 
 function normalizeRole(value: unknown): UserRoleRu {
-  return userRoleRuValues.includes(value as UserRoleRu) ? (value as UserRoleRu) : 'Пользователь';
+  if (legacyProviderRoles.includes(value as (typeof legacyProviderRoles)[number])) {
+    return 'Поставщик';
+  }
+
+  if (legacyConsumerRoles.includes(value as (typeof legacyConsumerRoles)[number])) {
+    return 'Потребитель';
+  }
+
+  return 'Потребитель';
 }
 
 function mapProfile(row: RawAppUser): AppUserProfile {
@@ -337,8 +348,14 @@ export async function searchAppUsers(
     request = request.contains('interests', [cleanInterest]);
   }
 
-  if (userRoleRuValues.includes(cleanRole as UserRoleRu)) {
-    request = request.eq('role', cleanRole);
+  if (cleanRole) {
+    const normalizedRole = normalizeRole(cleanRole);
+
+    if (normalizedRole === 'Поставщик') {
+      request = request.in('role', [...legacyProviderRoles]);
+    } else if (normalizedRole === 'Потребитель') {
+      request = request.in('role', [...legacyConsumerRoles]);
+    }
   }
 
   const { data, error } = await request;

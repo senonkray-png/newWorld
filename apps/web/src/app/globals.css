@@ -793,6 +793,102 @@ a {
   gap: 16px;
 }
 
+.nm-cabinet-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 14px;
+}
+
+.nm-cabinet-nav {
+  background: #ffffff;
+  border: 1px solid var(--nm-line);
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  position: sticky;
+  top: 86px;
+  height: fit-content;
+}
+
+.nm-cabinet-nav h2 {
+  margin: 0;
+  font-size: 1.22rem;
+}
+
+.nm-cabinet-nav p {
+  margin: 0;
+  color: var(--nm-soft-ink);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.nm-cabinet-nav-list {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 8px;
+}
+
+.nm-cabinet-nav-btn {
+  border: 1px solid #b4bdc4;
+  background: #d2d8de;
+  color: #34414a;
+  font: inherit;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 10px;
+  padding: 10px 14px;
+  text-align: left;
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 10px 50%);
+}
+
+.nm-cabinet-nav-btn:hover {
+  background: #c3ccd4;
+}
+
+.nm-cabinet-nav-btn.active {
+  border-color: #64b4cb;
+  background: #6fb5cc;
+  color: #103743;
+  font-weight: 700;
+}
+
+.nm-cabinet-content {
+  display: grid;
+  gap: 12px;
+}
+
+.nm-cabinet-list {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.nm-cabinet-list-item {
+  border: 1px solid var(--nm-line);
+  border-radius: 12px;
+  background: #f6f8fb;
+  padding: 11px;
+  display: grid;
+  gap: 4px;
+}
+
+.nm-cabinet-list-item strong {
+  color: var(--nm-ink);
+}
+
+.nm-cabinet-list-item span,
+.nm-cabinet-list-item small {
+  color: var(--nm-soft-ink);
+}
+
+.nm-cabinet-list-item-unread {
+  border-color: #70b2ca;
+  background: #eaf5f9;
+}
+
 .nm-register-card {
   background: #ffffff;
   border: 1px solid var(--nm-line);
@@ -949,6 +1045,30 @@ a {
 .nm-market-board-head h3,
 .nm-market-board-head p {
   margin: 0;
+}
+
+.nm-service-switch {
+  margin-bottom: 12px;
+  border: 2px solid #1f9fbc;
+  border-radius: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+.nm-service-switch-btn {
+  border: none;
+  background: #ffffff;
+  color: #1d2a31;
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.nm-service-switch-btn.active {
+  background: #8ec5d6;
+  color: #173e4a;
 }
 
 .nm-market-image {
@@ -1241,6 +1361,7 @@ a {
 
   .nm-grid-4,
   .nm-grid-3,
+  .nm-cabinet-shell,
   .nm-market-grid,
   .nm-messages-layout,
   .nm-profile-view-grid,
@@ -1248,6 +1369,10 @@ a {
   .nm-story-wrap,
   .nm-team {
     grid-template-columns: 1fr;
+  }
+
+  .nm-cabinet-nav {
+    position: static;
   }
 
   .nm-story-image {

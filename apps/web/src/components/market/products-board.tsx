@@ -20,7 +20,7 @@ type ProductItem = {
   removedReason: string;
 };
 
-type ViewerRole = 'Пользователь' | 'Продавец' | 'Поставщик услуг' | '';
+type ViewerRole = 'Потребитель' | 'Поставщик' | '';
 type BoardMode = 'catalog' | 'cabinet';
 type ModerationAction = 'warn' | 'remove' | 'restore';
 type ReasonDialogState = {
@@ -55,7 +55,7 @@ function textByLocale(locale: Locale) {
       removePrompt: 'Removal reason',
       removedByAdmin: 'Removed by admin',
       lockedByModeration: 'This item was removed by moderation. Editing is locked, only deletion is available.',
-      sellerOnly: 'Only users with Seller role can add products.',
+      sellerOnly: 'Only users with Provider role can add products.',
       loginRequired: 'Please log in to add a product.',
       pay: 'Pai',
       warnTip: 'Warn seller',
@@ -94,7 +94,7 @@ function textByLocale(locale: Locale) {
       removePrompt: 'Причина видалення',
       removedByAdmin: 'Прибрано адміністратором',
       lockedByModeration: 'Товар знято модератором. Редагування заблоковано, доступне лише видалення.',
-      sellerOnly: 'Додавати товари можуть лише користувачі з роллю Продавець.',
+      sellerOnly: 'Додавати товари можуть лише користувачі з роллю Постачальник.',
       loginRequired: 'Увійдіть, щоб додати товар.',
       pay: 'Пай',
       warnTip: 'Попередити продавця',
@@ -132,7 +132,7 @@ function textByLocale(locale: Locale) {
     removePrompt: 'Причина скрытия',
     removedByAdmin: 'Снято модератором',
     lockedByModeration: 'Товар снят модератором. Редактирование заблокировано, доступно только удаление.',
-    sellerOnly: 'Добавлять товары могут только пользователи с ролью Продавец.',
+    sellerOnly: 'Добавлять товары могут только пользователи с ролью Поставщик.',
     loginRequired: 'Войдите, чтобы добавить товар.',
     pay: 'Пай',
     warnTip: 'Предупредить продавца',
@@ -146,21 +146,11 @@ function textByLocale(locale: Locale) {
 }
 
 function getReasonPresets(locale: Locale, action: 'warn' | 'remove') {
-  if (locale === 'en') {
-    return action === 'warn'
-      ? ['Clarify description', 'Wrong category', 'Contact details in text']
-      : ['Prohibited product', 'Spam or duplicate', 'Misleading description'];
+  if (action === 'warn') {
+    return ['Дублирование', 'Нарушение правил'];
   }
 
-  if (locale === 'uk') {
-    return action === 'warn'
-      ? ['Уточніть опис', 'Невірна категорія', 'Контакти в тексті']
-      : ['Заборонений товар', 'Спам або дубль', 'Опис вводить в оману'];
-  }
-
-  return action === 'warn'
-    ? ['Уточните описание', 'Неверная категория', 'Контакты в тексте']
-    : ['Запрещенный товар', 'Спам или дубль', 'Описание вводит в заблуждение'];
+  return ['для уточнение причины свяжитесь с потдержкой', 'Дублирование', 'Нарушение правил'];
 }
 
 export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mode?: BoardMode }) {
@@ -268,7 +258,7 @@ export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
       return;
     }
 
-    if (role !== 'Продавец') {
+    if (role !== 'Поставщик') {
       setStatus(t.sellerOnly);
       return;
     }

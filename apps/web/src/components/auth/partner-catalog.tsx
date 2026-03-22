@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Locale } from '@/i18n/config';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
-type UserRole = 'Пользователь' | 'Продавец' | 'Поставщик услуг';
+type UserRole = 'Потребитель' | 'Поставщик';
 
 type Partner = {
   id: string;
@@ -31,20 +31,17 @@ type Partner = {
 
 function roleLabel(role: UserRole, locale: Locale) {
   if (locale === 'en') {
-    if (role === 'Продавец') return 'Seller';
-    if (role === 'Поставщик услуг') return 'Service provider';
-    return 'User';
+    if (role === 'Поставщик') return 'Provider';
+    return 'Consumer';
   }
 
   if (locale === 'uk') {
-    if (role === 'Продавец') return 'Продавець';
-    if (role === 'Поставщик услуг') return 'Постачальник послуг';
-    return 'Користувач';
+    if (role === 'Поставщик') return 'Постачальник';
+    return 'Споживач';
   }
 
-  if (role === 'Продавец') return 'Продавец';
-  if (role === 'Поставщик услуг') return 'Поставщик услуг';
-  return 'Пользователь';
+  if (role === 'Поставщик') return 'Поставщик';
+  return 'Потребитель';
 }
 
 export function PartnerCatalog({ locale }: { locale: Locale }) {
@@ -153,9 +150,8 @@ export function PartnerCatalog({ locale }: { locale: Locale }) {
               <span>{locale === 'en' ? 'Role' : 'Роль'}</span>
               <select value={role} onChange={(event) => setRole(event.target.value)}>
                 <option value="">{locale === 'en' ? 'All roles' : locale === 'uk' ? 'Усі ролі' : 'Все роли'}</option>
-                <option value="Пользователь">{roleLabel('Пользователь', locale)}</option>
-                <option value="Продавец">{roleLabel('Продавец', locale)}</option>
-                <option value="Поставщик услуг">{roleLabel('Поставщик услуг', locale)}</option>
+                <option value="Потребитель">{roleLabel('Потребитель', locale)}</option>
+                <option value="Поставщик">{roleLabel('Поставщик', locale)}</option>
               </select>
             </label>
             <div className="nm-admin-actions" style={{ gridColumn: '1 / -1' }}>

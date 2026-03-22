@@ -453,9 +453,8 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
                 <span>{t.role}</span>
                 <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)}>
                   <option value="">{t.allRoles}</option>
-                  <option value="Пользователь">Пользователь</option>
-                  <option value="Продавец">Продавец</option>
-                  <option value="Поставщик услуг">Поставщик услуг</option>
+                  <option value="Потребитель">Потребитель</option>
+                  <option value="Поставщик">Поставщик</option>
                 </select>
               </label>
               <div className="nm-admin-actions" style={{ marginTop: 0 }}>

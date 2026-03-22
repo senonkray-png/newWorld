@@ -21,8 +21,9 @@ type AdItem = {
   removedReason: string;
 };
 
-type ViewerRole = 'Пользователь' | 'Продавец' | 'Поставщик услуг' | '';
+type ViewerRole = 'Потребитель' | 'Поставщик' | '';
 type BoardMode = 'catalog' | 'cabinet';
+type ServiceTab = 'поиск услуги' | 'предложение услуги';
 type ModerationAction = 'warn' | 'remove' | 'restore';
 type ReasonDialogState = {
   itemId: string;
@@ -56,7 +57,7 @@ function textByLocale(locale: Locale) {
       warningPrompt: 'Warning reason',
       removePrompt: 'Removal reason',
       removedByAdmin: 'Removed by admin',
-      providerOnly: 'Only service providers can add ads.',
+      providerOnly: 'Only users with Provider role can add ads.',
       loginRequired: 'Please log in to post an ad.',
       pay: 'Pai',
       image: 'Photo link',
@@ -69,6 +70,8 @@ function textByLocale(locale: Locale) {
       customReason: 'Custom reason',
       apply: 'Apply',
       catalogHint: 'Your own posts, including hidden ones, are managed in the profile cabinet.',
+      requestsTab: 'Service request',
+      offersTab: 'Service offer',
     };
   }
 
@@ -98,7 +101,7 @@ function textByLocale(locale: Locale) {
       warningPrompt: 'Причина попередження',
       removePrompt: 'Причина видалення',
       removedByAdmin: 'Прибрано адміністратором',
-      providerOnly: 'Лише постачальники послуг можуть додавати оголошення.',
+      providerOnly: 'Лише користувачі з роллю Постачальник можуть додавати оголошення.',
       loginRequired: 'Увійдіть, щоб розмістити оголошення.',
       pay: 'Пай',
       image: 'Посилання на фото',
@@ -111,6 +114,8 @@ function textByLocale(locale: Locale) {
       customReason: 'Своя причина',
       apply: 'Застосувати',
       catalogHint: 'Керування власними оголошеннями, зокрема прихованими, доступне в кабінеті профілю.',
+      requestsTab: 'Пошук послуг',
+      offersTab: 'Пропозиція послуг',
     };
   }
 
@@ -139,7 +144,7 @@ function textByLocale(locale: Locale) {
     warningPrompt: 'Причина предупреждения',
     removePrompt: 'Причина скрытия',
     removedByAdmin: 'Снято модератором',
-    providerOnly: 'Только поставщики услуг могут добавлять объявления.',
+    providerOnly: 'Добавлять объявления могут только пользователи с ролью Поставщик.',
     loginRequired: 'Войдите, чтобы разместить объявление.',
     pay: 'Пай',
     image: 'Ссылка на фото',
@@ -152,25 +157,17 @@ function textByLocale(locale: Locale) {
     customReason: 'Своя причина',
     apply: 'Применить',
     catalogHint: 'Управление своими объявлениями, включая скрытые, доступно в кабинете профиля.',
+    requestsTab: 'Поиск услуг',
+    offersTab: 'Предложение услуг',
   };
 }
 
 function getReasonPresets(locale: Locale, action: 'warn' | 'remove') {
-  if (locale === 'en') {
-    return action === 'warn'
-      ? ['Clarify service description', 'Wrong category', 'Contact details in text']
-      : ['Forbidden service', 'Spam or duplicate', 'Misleading offer'];
+  if (action === 'warn') {
+    return ['Дублирование', 'Нарушение правил'];
   }
 
-  if (locale === 'uk') {
-    return action === 'warn'
-      ? ['Уточніть опис послуги', 'Невірна категорія', 'Контакти в тексті']
-      : ['Заборонена послуга', 'Спам або дубль', 'Пропозиція вводить в оману'];
-  }
-
-  return action === 'warn'
-    ? ['Уточните описание услуги', 'Неверная категория', 'Контакты в тексте']
-    : ['Запрещенная услуга', 'Спам или дубль', 'Предложение вводит в заблуждение'];
+  return ['для уточнение причины свяжитесь с потдержкой', 'Дублирование', 'Нарушение правил'];
 }
 
 export function ServicesBoard({ locale, mode = 'catalog' }: { locale: Locale; mode?: BoardMode }) {
@@ -192,6 +189,7 @@ export function ServicesBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
   const [reasonDialog, setReasonDialog] = useState<ReasonDialogState>(null);
   const [customReason, setCustomReason] = useState('');
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [serviceTab, setServiceTab] = useState<ServiceTab>('предложение услуги');
   const [form, setForm] = useState({
     type: 'поиск услуги' as 'поиск услуги' | 'предложение услуги',
     title: '',
@@ -276,7 +274,7 @@ export function ServicesBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
       return;
     }
 
-    if (role !== 'Поставщик услуг') {
+    if (role !== 'Поставщик') {
       setStatus(t.providerOnly);
       return;
     }
@@ -452,10 +450,28 @@ export function ServicesBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
             </button>
           </div>
         ) : null}
+        {mode === 'cabinet' ? (
+          <div className="nm-service-switch" role="tablist" aria-label={t.type}>
+            <button
+              type="button"
+              className={`nm-service-switch-btn${serviceTab === 'предложение услуги' ? ' active' : ''}`}
+              onClick={() => setServiceTab('предложение услуги')}
+            >
+              {t.offersTab}
+            </button>
+            <button
+              type="button"
+              className={`nm-service-switch-btn${serviceTab === 'поиск услуги' ? ' active' : ''}`}
+              onClick={() => setServiceTab('поиск услуги')}
+            >
+              {t.requestsTab}
+            </button>
+          </div>
+        ) : null}
         {mode === 'cabinet' && status ? <p className="nm-admin-status">{status}</p> : null}
         <div className="nm-market-grid">
-          {!loading && items.length === 0 ? <p>{t.noAds}</p> : null}
-          {items.map((item) => (
+          {!loading && (mode === 'cabinet' ? items.filter((item) => item.type === serviceTab) : items).length === 0 ? <p>{t.noAds}</p> : null}
+          {(mode === 'cabinet' ? items.filter((item) => item.type === serviceTab) : items).map((item) => (
             <article key={item.id} className="nm-market-card">
               {item.imageUrl ? <Image src={item.imageUrl} alt={item.title} width={640} height={480} className="nm-market-image" unoptimized /> : null}
               <p className="nm-market-subtle"><strong>{item.type === 'поиск услуги' ? t.search : t.offer}</strong></p>

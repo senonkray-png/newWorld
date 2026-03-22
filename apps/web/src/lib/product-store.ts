@@ -46,6 +46,10 @@ function parsePrice(value: unknown): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function isProviderRole(value: unknown) {
+  return value === 'Поставщик' || value === 'Продавец' || value === 'Поставщик услуг';
+}
+
 function mapProduct(
   row: RawProduct,
   sellerName = 'Пользователь',
@@ -165,8 +169,8 @@ export async function createProduct(
     throw profileError;
   }
 
-  if (!profile || profile.role !== 'Продавец') {
-    throw new Error('seller role required');
+  if (!profile || !isProviderRole(profile.role)) {
+    throw new Error('provider role required');
   }
 
   const { data, error } = await supabase

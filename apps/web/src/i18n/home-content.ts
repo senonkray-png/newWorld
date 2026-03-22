@@ -65,7 +65,7 @@ export const defaultHomeContent: Record<Locale, HomeContent> = {
       },
       {
         title: 'Аналитика',
-        text: 'Дашборды для продавцов, организаторов и владельца платформы.',
+        text: 'Дашборды для поставщиков, организаторов и владельца платформы.',
         icon: '/design/icon-3.png',
       },
       {
@@ -78,7 +78,7 @@ export const defaultHomeContent: Record<Locale, HomeContent> = {
     processItems: [
       {
         title: 'Регистрация участника',
-        text: 'Пайщик, продавец или организатор подключается за несколько шагов.',
+        text: 'Пайщик, поставщик или организатор подключается за несколько шагов.',
         icon: '/design/icon-5.png',
       },
       {
@@ -148,7 +148,7 @@ export const defaultHomeContent: Record<Locale, HomeContent> = {
       },
       {
         title: 'Аналітика',
-        text: 'Дашборди для продавців, організаторів і власника платформи.',
+        text: 'Дашборди для постачальників, організаторів і власника платформи.',
         icon: '/design/icon-3.png',
       },
       {
@@ -161,7 +161,7 @@ export const defaultHomeContent: Record<Locale, HomeContent> = {
     processItems: [
       {
         title: 'Реєстрація учасника',
-        text: 'Пайовик, продавець або організатор підключається за кілька кроків.',
+        text: 'Пайовик, постачальник або організатор підключається за кілька кроків.',
         icon: '/design/icon-5.png',
       },
       {
@@ -231,7 +231,7 @@ export const defaultHomeContent: Record<Locale, HomeContent> = {
       },
       {
         title: 'Analytics',
-        text: 'Dashboards for sellers, organizers, and administrators.',
+        text: 'Dashboards for providers, organizers, and administrators.',
         icon: '/design/icon-3.png',
       },
       {
@@ -244,7 +244,7 @@ export const defaultHomeContent: Record<Locale, HomeContent> = {
     processItems: [
       {
         title: 'Member onboarding',
-        text: 'A member, seller, or organizer joins in a few guided steps.',
+        text: 'A member, provider, or organizer joins in a few guided steps.',
         icon: '/design/icon-5.png',
       },
       {

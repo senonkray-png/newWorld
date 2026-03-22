@@ -49,8 +49,8 @@ export async function POST(request: Request) {
     const product = await createProduct(viewer.userId, payload?.product ?? payload);
     return NextResponse.json({ product });
   } catch (error) {
-    if (error instanceof Error && error.message.includes('seller role required')) {
-      return NextResponse.json({ error: 'Only seller can create products' }, { status: 403 });
+    if (error instanceof Error && error.message.includes('provider role required')) {
+      return NextResponse.json({ error: 'Only provider can create products' }, { status: 403 });
     }
 
     if (error instanceof Error && error.message.includes('required')) {
