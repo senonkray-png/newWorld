@@ -281,6 +281,53 @@ a {
   line-height: 1;
 }
 
+.nm-notification-wrap {
+  position: relative;
+}
+
+.nm-notification-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(360px, 92vw);
+  max-height: 360px;
+  overflow: auto;
+  background: #12222c;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  padding: 10px;
+  z-index: 250;
+  display: grid;
+  gap: 8px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+
+.nm-notification-item {
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #e8f3f8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.nm-notification-item strong {
+  font-size: 0.9rem;
+}
+
+.nm-notification-item span {
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+.nm-notification-item--unread {
+  border-color: rgba(80, 175, 255, 0.75);
+  background: rgba(80, 175, 255, 0.1);
+}
+
 .nm-logout-btn {
   min-height: 34px;
   padding: 0 12px;

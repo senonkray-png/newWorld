@@ -51,3 +51,8 @@ export async function requireMainAdmin(request: Request) {
 
   return null;
 }
+
+export async function isMainAdminUser(userId: string): Promise<boolean> {
+  const profile = await getProfileByUserId(userId);
+  return profile?.role === 'main_admin';
+}

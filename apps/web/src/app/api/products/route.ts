@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getViewerFromRequest } from '@/lib/auth-server';
-import { createProduct, getProducts } from '@/lib/product-store';
+import { createProduct, getProducts, getProductsForViewer } from '@/lib/product-store';
 
 function mapApiError(error: unknown) {
   if (error instanceof Error && error.message.includes("Could not find the table 'public.products'")) {
@@ -19,6 +19,18 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const sellerId = (url.searchParams.get('sellerId') ?? '').trim();
+    const includeMine = url.searchParams.get('includeMine') === '1';
+
+    if (includeMine) {
+      const viewer = await getViewerFromRequest(request);
+      if (!viewer) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      const products = await getProductsForViewer(viewer.userId);
+      return NextResponse.json({ products });
+    }
+
     const products = await getProducts(sellerId || undefined);
     return NextResponse.json({ products });
   } catch (error) {

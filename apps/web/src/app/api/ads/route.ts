@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getViewerFromRequest } from '@/lib/auth-server';
-import { createAd, getAds } from '@/lib/ad-store';
+import { createAd, getAds, getAdsForViewer } from '@/lib/ad-store';
 
 function mapApiError(error: unknown) {
   if (error instanceof Error && error.message.includes("Could not find the table 'public.ads'")) {
@@ -15,8 +15,21 @@ function mapApiError(error: unknown) {
   return error instanceof Error ? error.message : 'Failed to load ads';
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const url = new URL(request.url);
+    const includeMine = url.searchParams.get('includeMine') === '1';
+
+    if (includeMine) {
+      const viewer = await getViewerFromRequest(request);
+      if (!viewer) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      const ads = await getAdsForViewer(viewer.userId);
+      return NextResponse.json({ ads });
+    }
+
     const ads = await getAds();
     return NextResponse.json({ ads });
   } catch (error) {
