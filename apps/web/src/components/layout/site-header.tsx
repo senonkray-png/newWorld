@@ -65,9 +65,9 @@ export function SiteHeader({ locale }: { locale: Locale }) {
   return (
     <header className="nm-site-header-wrap">
       <div className="nm-site-header">
-        <Link href={`/${locale}`} className="nm-site-brand" aria-label="New World">
-          <Image src="/design/site-logo.png" alt="New World logo" width={34} height={34} className="nm-site-logo" priority />
-          <span className="nm-site-title">New World</span>
+        <Link href={`/${locale}`} className="nm-site-brand" aria-label="СпівДія">
+          <Image src="/design/spivdiya-logo.png" alt="СпівДія logo" width={34} height={34} className="nm-site-logo" priority />
+          <span className="nm-site-title">СпівДія</span>
         </Link>
 
         <div className="nm-site-controls">

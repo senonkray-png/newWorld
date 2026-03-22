@@ -1,5 +1,5 @@
 const en = {
-  brand: 'New World',
+  brand: 'SpivDiia',
   heroTitle: 'A direct exchange platform for producers and cooperative members',
   heroText: 'Products, services, pickup points, orders, delivery, and a powerful content admin panel in one system.',
   primaryAction: 'Open catalog',

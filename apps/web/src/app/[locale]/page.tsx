@@ -14,14 +14,14 @@ export async function generateMetadata({
 
   if (!isLocale(locale)) {
     return {
-      title: 'New World',
+      title: 'СпівДія',
       description: 'Кооперативная платформа',
     };
   }
 
   const content = await getHomeContent(locale);
   return {
-    title: 'New World',
+    title: 'СпівДія',
     description: content.seo.description,
   };
 }

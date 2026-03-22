@@ -42,8 +42,8 @@ export type HomeContent = {
 export const defaultHomeContent: Record<Locale, HomeContent> = {
   ru: {
     seo: {
-      title: 'New World - кооперативная платформа прямого обмена',
-      description: 'Каталог товаров и услуг, точки выдачи, логистика и админ-панель для кооператива New World.',
+      title: 'СпівДія - кооперативная платформа прямого обмена',
+      description: 'Каталог товаров и услуг, точки выдачи, логистика и админ-панель для кооператива СпівДія.',
     },
     heroTitle: 'Объединяем производителей и пайщиков напрямую',
     heroText: 'Каталог товаров и услуг, точки выдачи, складской учет и заказы в одном удобном интерфейсе.',
@@ -125,8 +125,8 @@ export const defaultHomeContent: Record<Locale, HomeContent> = {
   },
   uk: {
     seo: {
-      title: 'New World - кооперативна платформа прямого обміну',
-      description: 'Каталог товарів і послуг, точки видачі, логістика та адмін-панель для кооперативу New World.',
+      title: 'СпівДія - кооперативна платформа прямого обміну',
+      description: 'Каталог товарів і послуг, точки видачі, логістика та адмін-панель для кооперативу СпівДія.',
     },
     heroTitle: 'Об\'єднуємо виробників і пайовиків напряму',
     heroText: 'Каталог товарів і послуг, точки видачі, складський облік та замовлення в одному зручному інтерфейсі.',
@@ -208,8 +208,8 @@ export const defaultHomeContent: Record<Locale, HomeContent> = {
   },
   en: {
     seo: {
-      title: 'New World - cooperative direct exchange platform',
-      description: 'Catalog, pickup points, logistics and content administration for the New World cooperative platform.',
+      title: 'SpivDiia - cooperative direct exchange platform',
+      description: 'Catalog, pickup points, logistics and content administration for the SpivDiia cooperative platform.',
     },
     heroTitle: 'Direct collaboration between producers and members',
     heroText: 'Products, services, pickup points, stock accounting, and orders in one clear interface.',
