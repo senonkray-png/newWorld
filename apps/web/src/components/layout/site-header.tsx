@@ -66,7 +66,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
     <header className="nm-site-header-wrap">
       <div className="nm-site-header">
         <Link href={`/${locale}`} className="nm-site-brand" aria-label="СпівДія">
-          <Image src="/design/site-logo.png" alt="СпівДія logo" width={34} height={34} className="nm-site-logo" priority />
+          <Image src="/design/site-logo.png" alt="СпівДія logo" width={44} height={48} className="nm-site-logo" priority />
           <span className="nm-site-title">СпівДія</span>
         </Link>
 
