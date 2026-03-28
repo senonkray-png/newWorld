@@ -287,17 +287,54 @@ export async function searchProfilesWithRole(
 export async function getAllProfilesForAdmin(): Promise<UserProfile[]> {
   const supabase = getSupabaseServiceClient() as any;
 
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .select('*')
+  // 1. Load all users from app_users (the primary user table)
+  const { data: appUsers, error: appError } = await supabase
+    .from('app_users')
+    .select('id, email, full_name, role, member_id, updated_at')
     .order('updated_at', { ascending: false })
-    .limit(200);
+    .limit(500);
 
-  if (error) {
-    throw error;
+  if (appError) {
+    throw appError;
   }
 
-  return (data ?? []).map(mapProfile);
+  // 2. Load role overrides from user_profiles
+  const { data: profiles } = await supabase
+    .from('user_profiles')
+    .select('user_id, role')
+    .limit(500);
+
+  const profileRoleMap = new Map<string, string>();
+  for (const p of profiles ?? []) {
+    profileRoleMap.set(p.user_id, p.role);
+  }
+
+  const appUserRoleToProfileRole = (r: string | null): UserRole => {
+    if (r === 'Поставщик' || r === 'Продавец' || r === 'Поставщик услуг') return 'provider';
+    return 'member';
+  };
+
+  return ((appUsers ?? []) as any[]).map((row) => {
+    const profileRole = profileRoleMap.get(row.id);
+    const role: UserRole = profileRole
+      ? normalizeRole(profileRole)
+      : appUserRoleToProfileRole(row.role);
+
+    return {
+      userId: row.id,
+      email: row.email ?? null,
+      fullName: cleanText(row.full_name) || null,
+      displayName: cleanText(row.full_name) || cleanText(row.email) || 'Пользователь',
+      accountIntent: role === 'provider' ? 'provider' : 'member',
+      businessInfo: '',
+      websiteUrl: null,
+      phonePersonal: null,
+      phoneWork: null,
+      interests: [],
+      role,
+      updatedAt: row.updated_at ?? new Date(0).toISOString(),
+    } satisfies UserProfile;
+  });
 }
 
 export async function setUserRole(userId: string, role: UserRole): Promise<void> {
@@ -307,10 +344,13 @@ export async function setUserRole(userId: string, role: UserRole): Promise<void>
 
   const supabase = getSupabaseServiceClient() as any;
 
+  // Update user_profiles (upsert to handle users without a profile row)
   const { error } = await supabase
     .from('user_profiles')
-    .update({ role })
-    .eq('user_id', userId);
+    .upsert(
+      { user_id: userId, role, display_name: 'Пользователь', account_intent: 'member', business_info: '', updated_at: new Date().toISOString() },
+      { onConflict: 'user_id', ignoreDuplicates: false },
+    );
 
   if (error) {
     throw error;
