@@ -342,13 +342,29 @@ export async function setUserRole(userId: string, role: UserRole): Promise<void>
     throw new Error('Invalid role');
   }
 
+  // Map app-level roles to DB-level values that satisfy CHECK constraints
+  const dbRoleMap: Record<UserRole, string> = {
+    member: 'member',
+    provider: 'seller',
+    organizer: 'organizer',
+    main_admin: 'main_admin',
+  };
+  const dbRole = dbRoleMap[role];
+
   const supabase = getSupabaseServiceClient() as any;
 
   // Update user_profiles (upsert to handle users without a profile row)
   const { error } = await supabase
     .from('user_profiles')
     .upsert(
-      { user_id: userId, role, display_name: 'Пользователь', account_intent: 'member', business_info: '', updated_at: new Date().toISOString() },
+      {
+        user_id: userId,
+        role: dbRole,
+        display_name: 'Пользователь',
+        account_intent: 'both',
+        business_info: '',
+        updated_at: new Date().toISOString(),
+      },
       { onConflict: 'user_id', ignoreDuplicates: false },
     );
 
