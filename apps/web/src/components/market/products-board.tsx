@@ -43,7 +43,7 @@ function textByLocale(locale: Locale) {
       image: 'Image URL',
       name: 'Title',
       description: 'Description',
-      price: 'Price',
+      price: 'Price (cooperative units)',
       edit: 'Edit',
       delete: 'Delete',
       update: 'Update',
@@ -57,7 +57,7 @@ function textByLocale(locale: Locale) {
       lockedByModeration: 'This item was removed by moderation. Editing is locked, only deletion is available.',
       sellerOnly: 'Only users with Provider role can add products.',
       loginRequired: 'Please log in to add a product.',
-      pay: 'Pai',
+      pay: 'coop. units',
       warnTip: 'Warn seller',
       removeTip: 'Hide product',
       restoreTip: 'Restore product',
@@ -65,6 +65,9 @@ function textByLocale(locale: Locale) {
       customReason: 'Custom reason',
       apply: 'Apply',
       uploadHint: 'Owner management is available in the profile cabinet.',
+      payWithPai: 'Receive for cooperative share contribution',
+      paying: 'Processing...',
+      insufficientPai: 'Not enough cooperative units',
     };
   }
 
@@ -82,7 +85,7 @@ function textByLocale(locale: Locale) {
       image: 'URL зображення',
       name: 'Назва',
       description: 'Опис',
-      price: 'Ціна',
+      price: 'Вартість (паєві од.)',
       edit: 'Редагувати',
       delete: 'Видалити',
       update: 'Оновити',
@@ -96,7 +99,7 @@ function textByLocale(locale: Locale) {
       lockedByModeration: 'Товар знято модератором. Редагування заблоковано, доступне лише видалення.',
       sellerOnly: 'Додавати товари можуть лише користувачі з роллю Постачальник.',
       loginRequired: 'Увійдіть, щоб додати товар.',
-      pay: 'Пай',
+      pay: 'од.',
       warnTip: 'Попередити продавця',
       removeTip: 'Приховати товар',
       restoreTip: 'Відновити товар',
@@ -104,6 +107,9 @@ function textByLocale(locale: Locale) {
       customReason: 'Своя причина',
       apply: 'Застосувати',
       uploadHint: 'Керування власними товарами доступне в кабінеті профілю.',
+      payWithPai: 'Отримати за паєвий внесок',
+      paying: 'Обробка...',
+      insufficientPai: 'Недостатньо паєвих одиниць',
     };
   }
 
@@ -120,7 +126,7 @@ function textByLocale(locale: Locale) {
     image: 'URL изображения',
     name: 'Название',
     description: 'Описание',
-    price: 'Цена',
+    price: 'Стоимость (паевые ед.)',
     edit: 'Редактировать',
     delete: 'Удалить',
     update: 'Обновить',
@@ -134,7 +140,7 @@ function textByLocale(locale: Locale) {
     lockedByModeration: 'Товар снят модератором. Редактирование заблокировано, доступно только удаление.',
     sellerOnly: 'Добавлять товары могут только пользователи с ролью Поставщик.',
     loginRequired: 'Войдите, чтобы добавить товар.',
-    pay: 'Пай',
+    pay: 'од.',
     warnTip: 'Предупредить продавца',
     removeTip: 'Скрыть товар',
     restoreTip: 'Восстановить товар',
@@ -142,6 +148,9 @@ function textByLocale(locale: Locale) {
     customReason: 'Своя причина',
     apply: 'Применить',
     uploadHint: 'Управление своими товарами доступно в кабинете профиля.',
+    payWithPai: 'Получить за паевой взнос',
+    paying: 'Обработка...',
+    insufficientPai: 'Недостаточно паевых единиц',
   };
 }
 
@@ -169,6 +178,8 @@ export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string>('');
   const [actionBusyId, setActionBusyId] = useState<string>('');
+  const [balancePai, setBalancePai] = useState<number | null>(null);
+  const [purchaseBusyId, setPurchaseBusyId] = useState<string>('');
   const [reasonDialog, setReasonDialog] = useState<ReasonDialogState>(null);
   const [customReason, setCustomReason] = useState('');
   const [form, setForm] = useState({
@@ -251,6 +262,58 @@ export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
   useEffect(() => {
     loadProducts();
   }, [loadProducts]);
+
+  const loadBalance = useCallback(async () => {
+    if (!token) {
+      setBalancePai(null);
+      return;
+    }
+
+    const res = await fetch('/api/pai/balance', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      setBalancePai(null);
+      return;
+    }
+
+    const payload = (await res.json()) as { balancePai?: number };
+    setBalancePai(typeof payload.balancePai === 'number' ? payload.balancePai : 0);
+  }, [token]);
+
+  useEffect(() => {
+    void loadBalance();
+  }, [loadBalance]);
+
+  const purchaseWithPai = async (productId: string) => {
+    if (!token) {
+      return;
+    }
+
+    setPurchaseBusyId(productId);
+    setStatus('');
+
+    const res = await fetch('/api/pai/purchase', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productId }),
+    });
+
+    setPurchaseBusyId('');
+
+    if (!res.ok) {
+      const err = (await res.json().catch(() => ({}))) as { error?: string };
+      setStatus(err.error ?? 'Ошибка оплаты');
+      return;
+    }
+
+    setStatus('');
+    await loadBalance();
+  };
 
   const openModal = () => {
     if (!token) {
@@ -445,6 +508,22 @@ export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
                   >
                     {locale === 'en' ? 'Contact seller' : locale === 'uk' ? "Зв'язок з продавцем" : 'Написать продавцу'}
                   </Link>
+                  <button
+                    type="button"
+                    className="nm-btn nm-btn-secondary nm-btn-sm"
+                    disabled={
+                      purchaseBusyId === item.id ||
+                      balancePai === null ||
+                      item.price <= 0 ||
+                      balancePai < item.price
+                    }
+                    title={
+                      balancePai !== null && balancePai < item.price ? t.insufficientPai : undefined
+                    }
+                    onClick={() => void purchaseWithPai(item.id)}
+                  >
+                    {purchaseBusyId === item.id ? t.paying : t.payWithPai}
+                  </button>
                 </div>
               ) : null}
               {mode === 'cabinet' && item.sellerId === viewerId ? (

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ProductsBoard } from '@/components/market/products-board';
+import { WalletPanel } from '@/components/pai/wallet-panel';
 import { ServicesBoard } from '@/components/market/services-board';
 import type { Locale } from '@/i18n/config';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
@@ -32,7 +33,7 @@ type ProfileFormState = {
   aboutMe: string;
 };
 
-type CabinetSection = 'main' | 'messages' | 'notifications' | 'products' | 'services';
+type CabinetSection = 'main' | 'messages' | 'notifications' | 'wallet' | 'products' | 'services';
 
 type NotificationItem = {
   id: string;
@@ -102,6 +103,7 @@ function textByLocale(locale: Locale) {
       navMain: 'Main',
       navMessages: 'Messages',
       navNotifications: 'System notifications',
+      navWallet: 'Cooperative share',
       navProducts: 'My products',
       navServices: 'Services',
       cabinetTitle: 'User cabinet',
@@ -150,6 +152,7 @@ function textByLocale(locale: Locale) {
       navMain: 'Основне',
       navMessages: 'Повідомлення',
       navNotifications: 'Сист. сповіщення',
+      navWallet: 'Паєвий внесок',
       navProducts: 'Мої товари',
       navServices: 'Послуги',
       cabinetTitle: 'Кабінет користувача',
@@ -197,8 +200,9 @@ function textByLocale(locale: Locale) {
     navMain: 'Основное',
     navMessages: 'Сообщение',
     navNotifications: 'Сис. уведомление',
-    navProducts: 'Мои товары',
-    navServices: 'Услуги',
+      navWallet: 'Паевой взнос',
+      navProducts: 'Мои товары',
+      navServices: 'Услуги',
     cabinetTitle: 'Кабинет пользователя',
     cabinetSubtitle: 'Управляйте профилем, активностью и разделами маркетплейса в одном месте.',
     sectionMainTitle: 'Основные данные профиля',
@@ -207,9 +211,9 @@ function textByLocale(locale: Locale) {
     sectionMessagesHint: 'Быстрый просмотр последних диалогов. Для продолжения откройте полный чат.',
     sectionNotificationsTitle: 'Системные уведомления',
     sectionNotificationsHint: 'Модерационные и системные обновления в хронологическом порядке.',
-    sectionProductsTitle: 'Мои товары',
-    sectionProductsHint: 'Управляйте карточками товаров, включая скрытые.',
-    sectionServicesTitle: 'Услуги',
+      sectionProductsTitle: 'Мои товары',
+      sectionProductsHint: 'Управляйте карточками товаров, включая скрытые.',
+      sectionServicesTitle: 'Услуги',
     sectionServicesHint: 'Управляйте запросами и предложениями услуг с переключателем типов.',
     openMessages: 'Открыть сообщения',
     noMessagesYet: 'Пока нет диалогов.',
@@ -520,6 +524,7 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
             <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'main' ? ' active' : ''}`} onClick={() => setActiveSection('main')}>{t.navMain}</button>
             <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'messages' ? ' active' : ''}`} onClick={() => setActiveSection('messages')}>{t.navMessages}</button>
             <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'notifications' ? ' active' : ''}`} onClick={() => setActiveSection('notifications')}>{t.navNotifications}</button>
+            <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'wallet' ? ' active' : ''}`} onClick={() => setActiveSection('wallet')}>{t.navWallet}</button>
             <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'products' ? ' active' : ''}`} onClick={() => setActiveSection('products')}>{t.navProducts}</button>
             <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'services' ? ' active' : ''}`} onClick={() => setActiveSection('services')}>{t.navServices}</button>
           </div>
@@ -665,6 +670,8 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
               </div>
             </section>
           ) : null}
+
+          {activeSection === 'wallet' ? <WalletPanel locale={locale} token={token} /> : null}
 
           {activeSection === 'notifications' ? (
             <section className="nm-register-card">

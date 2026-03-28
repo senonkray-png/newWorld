@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-service';
 
 const STORAGE_BUCKET = 'media';
-const allowedFolders = new Set(['avatars', 'home', 'general']);
+const allowedFolders = new Set(['avatars', 'home', 'general', 'receipts']);
 
 function sanitizeSegment(value: string, fallback: string) {
   const cleaned = value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');

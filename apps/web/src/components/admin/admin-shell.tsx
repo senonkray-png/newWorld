@@ -2,13 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { CoopRegistryExport } from '@/components/admin/coop-registry-export';
+import { DepositRequestsAdmin } from '@/components/admin/deposit-requests-admin';
+import { WithdrawalRequestsAdmin } from '@/components/admin/withdrawal-requests-admin';
 import type { Locale } from '@/i18n/config';
 import type { HomeContent } from '@/i18n/home-content';
 import { HomeEditor } from '@/components/admin/home-editor';
 import { UserRoleManager } from '@/components/admin/user-role-manager';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
-type AdminTab = 'content' | 'users';
+type AdminTab = 'content' | 'users' | 'deposits';
 
 export function AdminShell({ locale }: { locale: Locale }) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
@@ -37,7 +40,6 @@ export function AdminShell({ locale }: { locale: Locale }) {
 
       setAccessToken(token);
 
-      // Check role first
       const profileRes = await fetch('/api/profile/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -83,28 +85,6 @@ export function AdminShell({ locale }: { locale: Locale }) {
     };
   }, [locale, supabase]);
 
-  if (loading) {
-    return (
-      <main className="nm-register-page">
-        <section className="nm-register-card">
-          <h1>Загружаем админ-панель...</h1>
-        </section>
-      </main>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <main className="nm-register-page">
-        <section className="nm-register-card">
-          <h1 style={{ color: '#e74c3c' }}>Доступ запрещён</h1>
-          <p style={{ opacity: 0.7, marginTop: '0.5rem' }}>
-            Эта страница доступна только администратору.
-          </p>
-        </section>
-      </main>
-    );
-  }
   async function claimAdmin() {
     if (!accessToken) return;
     setBootstrapping(true);
@@ -119,6 +99,16 @@ export function AdminShell({ locale }: { locale: Locale }) {
       const data = (await res.json()) as { error?: string };
       alert(data.error ?? 'Ошибка');
     }
+  }
+
+  if (loading) {
+    return (
+      <main className="nm-register-page">
+        <section className="nm-register-card">
+          <h1>Загружаем админ-панель...</h1>
+        </section>
+      </main>
+    );
   }
 
   if (!isAdmin) {
@@ -160,16 +150,38 @@ export function AdminShell({ locale }: { locale: Locale }) {
           >
             Пользователи
           </button>
+          <button
+            className={`nm-admin-tab${tab === 'deposits' ? ' active' : ''}`}
+            onClick={() => setTab('deposits')}
+          >
+            ПК: взноси та реєстр пайщиків
+          </button>
         </nav>
       </div>
 
       {tab === 'content' && content ? (
         <HomeEditor locale={locale} initialContent={content} accessToken={accessToken ?? ''} />
-      ) : (
+      ) : null}
+
+      {tab === 'users' ? (
         <section className="nm-register-card" style={{ maxWidth: '900px' }}>
           <UserRoleManager locale={locale} />
         </section>
-      )}
+      ) : null}
+
+      {tab === 'deposits' && accessToken ? (
+        <section className="nm-register-card" style={{ maxWidth: '900px' }}>
+          <DepositRequestsAdmin accessToken={accessToken} />
+          <WithdrawalRequestsAdmin accessToken={accessToken} />
+          <CoopRegistryExport accessToken={accessToken} />
+        </section>
+      ) : null}
+
+      {tab === 'content' && !content ? (
+        <section className="nm-register-card">
+          <p className="nm-admin-hint">Не вдалося завантажити контент головної сторінки.</p>
+        </section>
+      ) : null}
     </main>
   );
 }
