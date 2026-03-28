@@ -277,6 +277,15 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
     void loadAll();
   }, [loadAll]);
 
+  /* Auto-poll every 30 s while there are pending deposits so the UI
+     refreshes automatically once Monobank cron approves the payment. */
+  useEffect(() => {
+    const hasPending = depositRequests.some((d) => d.status === 'pending');
+    if (!hasPending) return;
+    const id = setInterval(() => void loadAll(), 30_000);
+    return () => clearInterval(id);
+  }, [depositRequests, loadAll]);
+
   const uploadReceiptFile = async (file: File | null) => {
     if (!file || !token) return;
     setUploadingReceipt(true);
@@ -474,6 +483,35 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
                 {depositSubmitting ? t.submitting : t.submitRequest}
               </button>
             </div>
+
+            <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(59,130,246,0.08)', borderRadius: '0.5rem', border: '1px solid rgba(59,130,246,0.2)' }}>
+              <p style={{ fontWeight: 700, fontSize: '1rem', margin: '0 0 0.5rem' }}>
+                {locale === 'en'
+                  ? '💳 Payment via Monobank jar'
+                  : locale === 'uk'
+                    ? '💳 Оплата через банку Monobank'
+                    : '💳 Оплата через банку Monobank'}
+              </p>
+              <p style={{ margin: '0 0 0.4rem' }}>
+                {locale === 'en'
+                  ? 'Send payment to the jar link below. In the comment field, you MUST enter the code from your deposit request (e.g. PAI-1234). Payment is verified automatically within 2–5 minutes.'
+                  : locale === 'uk'
+                    ? 'Надішліть оплату на банку за посиланням нижче. В коментарі до платежу ОБОВ\'ЯЗКОВО вкажіть код із заявки (наприклад PAI-1234). Оплата перевіряється автоматично протягом 2–5 хвилин.'
+                    : 'Отправьте оплату на банку по ссылке ниже. В комментарии к платежу ОБЯЗАТЕЛЬНО укажите код из заявки (например PAI-1234). Оплата проверяется автоматически в течение 2–5 минут.'}
+              </p>
+              <p style={{ margin: '0 0 0.25rem' }}>
+                <a href="https://send.monobank.ua/jar/9G4acTn9o5" target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>
+                  🔗 send.monobank.ua/jar/9G4acTn9o5
+                </a>
+              </p>
+              <p style={{ margin: '0', fontSize: '0.85rem', opacity: 0.7 }}>
+                {locale === 'en'
+                  ? 'Card: 4441 1111 2604 7681'
+                  : locale === 'uk'
+                    ? 'Картка: 4441 1111 2604 7681'
+                    : 'Карта: 4441 1111 2604 7681'}
+              </p>
+            </div>
           </div>
 
           <div className="nm-admin-card" style={{ marginTop: '1rem' }}>
@@ -531,10 +569,35 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
             {depositRequests.length === 0 ? <p className="nm-admin-hint">—</p> : null}
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {depositRequests.map((d) => (
-                <li key={d.id} style={{ marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.5rem' }}>
-                  <strong>{d.amountUah.toFixed(2)} грн</strong> → прев’ю {d.amountPai.toFixed(2)} од. —{' '}
+                <li key={d.id} style={{ marginBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.5rem' }}>
+                  <strong>{d.amountUah.toFixed(2)} грн</strong> → прев&apos;ю {d.amountPai.toFixed(2)} од. —{' '}
                   {d.status === 'pending' ? t.pending : d.status === 'completed' ? t.completed : t.rejected}
                   {d.adminComment ? ` (${d.adminComment})` : ''}
+                  {d.paymentCode && d.status === 'pending' ? (
+                    <div style={{ marginTop: '0.4rem', padding: '0.5rem', background: 'rgba(250,204,21,0.12)', borderRadius: '0.4rem', border: '1px solid rgba(250,204,21,0.3)' }}>
+                      <p style={{ margin: '0 0 0.25rem', fontWeight: 700, fontSize: '1.1rem' }}>
+                        {locale === 'en'
+                          ? `📋 Payment code: ${d.paymentCode}`
+                          : locale === 'uk'
+                            ? `📋 Код для коментаря: ${d.paymentCode}`
+                            : `📋 Код для комментария: ${d.paymentCode}`}
+                      </p>
+                      <p style={{ margin: '0 0 0.25rem', fontSize: '0.85rem' }}>
+                        {locale === 'en'
+                          ? 'Enter this code in the payment comment. Verification takes 2–5 min.'
+                          : locale === 'uk'
+                            ? 'Вкажіть цей код у коментарі до платежу. Перевірка займає 2–5 хв.'
+                            : 'Укажите этот код в комментарии к платежу. Проверка занимает 2–5 мин.'}
+                      </p>
+                      <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.6 }}>
+                        ⏳ {locale === 'en'
+                          ? 'Awaiting payment confirmation...'
+                          : locale === 'uk'
+                            ? 'Очікуємо підтвердження оплати…'
+                            : 'Ожидаем подтверждение оплаты…'}
+                      </p>
+                    </div>
+                  ) : null}
                   {d.appliedBreakdown && d.status === 'completed' ? (
                     <small>
                       <br />
@@ -548,6 +611,21 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
                 </li>
               ))}
             </ul>
+            {depositRequests.some((d) => d.status === 'pending') ? (
+              <div style={{ marginTop: '0.5rem' }}>
+                <a
+                  href={`/${locale}/messages`}
+                  className="nm-btn nm-btn-secondary nm-btn-sm"
+                  style={{ display: 'inline-block' }}
+                >
+                  {locale === 'en'
+                    ? '❓ I paid but didn\'t receive units'
+                    : locale === 'uk'
+                      ? '❓ Я оплатив, але одиниці не надійшли'
+                      : '❓ Я оплатил, но единицы не пришли'}
+                </a>
+              </div>
+            ) : null}
           </div>
 
           <div className="nm-admin-card" style={{ marginTop: '1rem' }}>

@@ -22,6 +22,8 @@ export type DepositRequestRow = {
   amountUah: number;
   amountPai: number;
   receiptImage: string;
+  paymentCode: string | null;
+  monoTxId: string | null;
   status: 'pending' | 'completed' | 'rejected';
   adminComment: string | null;
   createdAt: string;
@@ -305,6 +307,10 @@ export async function createDepositRequest(
   const split = computeDepositSplitPreview(amountUah, completed, entranceUah, monthlyUah);
 
   const supabase = getSupabaseServiceClient() as any;
+
+  // Generate unique payment code PAI-XXXX
+  const paymentCode = `PAI-${String(Math.floor(1000 + Math.random() * 9000))}`;
+
   const { data, error } = await supabase
     .from('deposit_requests')
     .insert({
@@ -312,6 +318,7 @@ export async function createDepositRequest(
       amount_uah: amountUah,
       amount_pai: split.previewPai,
       receipt_image: receipt,
+      payment_code: paymentCode,
       status: 'pending',
     })
     .select('*')
@@ -332,6 +339,8 @@ function mapDepositRequest(row: any): DepositRequestRow {
     amountUah: parseAmount(row.amount_uah),
     amountPai: parseAmount(row.amount_pai),
     receiptImage: cleanText(row.receipt_image),
+    paymentCode: row.payment_code ? String(row.payment_code) : null,
+    monoTxId: row.mono_tx_id ? String(row.mono_tx_id) : null,
     status: row.status,
     adminComment: row.admin_comment ? String(row.admin_comment) : null,
     createdAt: row.created_at,
