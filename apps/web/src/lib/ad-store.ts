@@ -13,6 +13,7 @@ export type AdItem = {
   imageUrl: string;
   createdAt: string;
   authorName: string;
+  authorMemberId: number;
   isRemovedByAdmin: boolean;
   removedReason: string;
   removedAt: string | null;
@@ -54,7 +55,7 @@ function parsePrice(value: unknown): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function mapAd(row: RawAd, authorName = 'Пользователь'): AdItem {
+function mapAd(row: RawAd, authorName = 'Пользователь', authorMemberId = 0): AdItem {
   return {
     id: row.id,
     authorId: row.author_id,
@@ -65,6 +66,7 @@ function mapAd(row: RawAd, authorName = 'Пользователь'): AdItem {
     imageUrl: cleanText(row.image_url),
     createdAt: row.created_at,
     authorName,
+    authorMemberId,
     isRemovedByAdmin: Boolean(row.is_removed_by_admin),
     removedReason: cleanText(row.removed_reason),
     removedAt: row.removed_at,
@@ -88,20 +90,22 @@ export async function getAds(): Promise<AdItem[]> {
   const rows = (data ?? []) as RawAd[];
   const authorIds = Array.from(new Set(rows.map((item) => item.author_id)));
   const authorMap = new Map<string, string>();
+  const authorMemberIdMap = new Map<string, number>();
 
   if (authorIds.length > 0) {
     const { data: authors } = await supabase
       .from('app_users')
-      .select('id, full_name, company_name, email')
+      .select('id, full_name, company_name, email, member_id')
       .in('id', authorIds);
 
     (authors ?? []).forEach((author: any) => {
       const name = cleanText(author.full_name) || cleanText(author.company_name) || cleanText(author.email) || 'Пользователь';
       authorMap.set(author.id, name);
+      if (typeof author.member_id === 'number') authorMemberIdMap.set(author.id, author.member_id);
     });
   }
 
-  return rows.map((row) => mapAd(row, authorMap.get(row.author_id) ?? 'Пользователь'));
+  return rows.map((row) => mapAd(row, authorMap.get(row.author_id) ?? 'Пользователь', authorMemberIdMap.get(row.author_id) ?? 0));
 }
 
 export async function getAdsForViewer(viewerId: string): Promise<AdItem[]> {
@@ -120,20 +124,22 @@ export async function getAdsForViewer(viewerId: string): Promise<AdItem[]> {
   const rows = (data ?? []) as RawAd[];
   const authorIds = Array.from(new Set(rows.map((item) => item.author_id)));
   const authorMap = new Map<string, string>();
+  const authorMemberIdMap = new Map<string, number>();
 
   if (authorIds.length > 0) {
     const { data: authors } = await supabase
       .from('app_users')
-      .select('id, full_name, company_name, email')
+      .select('id, full_name, company_name, email, member_id')
       .in('id', authorIds);
 
     (authors ?? []).forEach((author: any) => {
       const name = cleanText(author.full_name) || cleanText(author.company_name) || cleanText(author.email) || 'Пользователь';
       authorMap.set(author.id, name);
+      if (typeof author.member_id === 'number') authorMemberIdMap.set(author.id, author.member_id);
     });
   }
 
-  return rows.map((row) => mapAd(row, authorMap.get(row.author_id) ?? 'Пользователь'));
+  return rows.map((row) => mapAd(row, authorMap.get(row.author_id) ?? 'Пользователь', authorMemberIdMap.get(row.author_id) ?? 0));
 }
 
 export async function createAd(userId: string, value: unknown): Promise<AdItem> {
@@ -153,7 +159,7 @@ export async function createAd(userId: string, value: unknown): Promise<AdItem> 
 
   const { data: author, error: authorError } = await supabase
     .from('app_users')
-    .select('id, full_name, company_name, email')
+    .select('id, full_name, company_name, email, member_id')
     .eq('id', userId)
     .maybeSingle();
 
@@ -183,6 +189,7 @@ export async function createAd(userId: string, value: unknown): Promise<AdItem> 
   return mapAd(
     row,
     cleanText(author?.full_name) || cleanText(author?.company_name) || cleanText(author?.email) || 'Пользователь',
+    typeof author?.member_id === 'number' ? author.member_id : 0,
   );
 }
 
@@ -244,13 +251,14 @@ export async function updateAd(
 
   const { data: author } = await supabase
     .from('app_users')
-    .select('full_name, company_name, email')
+    .select('full_name, company_name, email, member_id')
     .eq('id', userId)
     .maybeSingle();
 
   const authorName = cleanText(author?.full_name) || cleanText(author?.company_name) || cleanText(author?.email) || 'Пользователь';
+  const authorMemberId = typeof author?.member_id === 'number' ? author.member_id : 0;
 
-  return mapAd(data as RawAd, authorName);
+  return mapAd(data as RawAd, authorName, authorMemberId);
 }
 
 export async function deleteAd(userId: string, adId: string): Promise<void> {

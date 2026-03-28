@@ -27,6 +27,7 @@ type MessageItem = {
 
 type ContactItem = {
   id: string;
+  memberId: number;
   fullName: string;
   email: string;
   role: string;
@@ -555,7 +556,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
                           </span>
                         )}
                         <span className="nm-messages-contact-text">
-                          <strong>{item.fullName}</strong>
+                          <strong>{item.fullName}{item.memberId ? ` · ID: ${item.memberId}` : ''}</strong>
                           <span>{item.role}</span>
                           <small>{item.city || item.email}</small>
                         </span>

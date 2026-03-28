@@ -17,6 +17,7 @@ type AdItem = {
   imageUrl: string;
   createdAt: string;
   authorName: string;
+  authorMemberId: number;
   isRemovedByAdmin: boolean;
   removedReason: string;
 };
@@ -480,7 +481,7 @@ export function ServicesBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
                 <strong className="nm-market-price">{item.price.toFixed(2)} {t.pay}</strong>
               </div>
               <p>{item.description}</p>
-              <p className="nm-market-subtle"><small>{item.authorName}</small></p>
+              <p className="nm-market-subtle"><small>{item.authorName}{item.authorMemberId ? ` · ID: ${item.authorMemberId}` : ''}</small></p>
               {item.isRemovedByAdmin ? (
                 <p className="nm-admin-status">
                   {t.removedByAdmin}{item.removedReason ? `: ${item.removedReason}` : ''}

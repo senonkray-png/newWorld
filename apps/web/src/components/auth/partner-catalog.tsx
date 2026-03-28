@@ -11,8 +11,10 @@ type UserRole = 'Потребитель' | 'Поставщик';
 
 type Partner = {
   id: string;
+  memberId: number;
   fullName: string;
   email: string;
+  isEmailVerified: boolean;
   avatarUrl: string;
   country: string;
   region: string;
@@ -206,6 +208,12 @@ export function PartnerCatalog({ locale }: { locale: Locale }) {
                 <Link href={`/${locale}/users/${partner.id}`} className="nm-user-list-name">
                   {partner.fullName || partner.email || (locale === 'en' ? 'No name' : 'Без имени')}
                 </Link>
+                {partner.memberId ? (
+                  <span className="nm-user-list-id" style={{ fontSize: '0.82rem', color: '#888', fontWeight: 600 }}>ID: {partner.memberId}</span>
+                ) : null}
+                {partner.email && partner.isEmailVerified ? (
+                  <span className="nm-user-list-email" style={{ fontSize: '0.82rem', color: '#666' }}>{partner.email} ✓</span>
+                ) : null}
                 <span className="nm-user-list-role">{roleLabel(partner.role, locale)}</span>
                 {partner.companyName || partner.businessNiche ? (
                   <span className="nm-user-list-company">{partner.companyName || partner.businessNiche}</span>

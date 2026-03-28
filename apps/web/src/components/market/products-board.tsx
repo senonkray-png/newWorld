@@ -16,6 +16,7 @@ type ProductItem = {
   imageUrl: string;
   createdAt: string;
   sellerName: string;
+  sellerMemberId: number;
   isRemovedByAdmin: boolean;
   removedReason: string;
 };
@@ -494,7 +495,7 @@ export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
                 <strong className="nm-market-price">{item.price.toFixed(2)} {t.pay}</strong>
               </div>
               <p>{item.description}</p>
-              <p className="nm-market-subtle"><small>{item.sellerName}</small></p>
+              <p className="nm-market-subtle"><small>{item.sellerName}{item.sellerMemberId ? ` · ID: ${item.sellerMemberId}` : ''}</small></p>
               {item.isRemovedByAdmin ? (
                 <p className="nm-admin-status">
                   {t.removedByAdmin}{item.removedReason ? `: ${item.removedReason}` : ''}

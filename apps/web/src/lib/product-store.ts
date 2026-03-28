@@ -10,6 +10,7 @@ export type ProductItem = {
   imageUrl: string;
   createdAt: string;
   sellerName: string;
+  sellerMemberId: number;
   isRemovedByAdmin: boolean;
   removedReason: string;
   removedAt: string | null;
@@ -53,6 +54,7 @@ function isProviderRole(value: unknown) {
 function mapProduct(
   row: RawProduct,
   sellerName = 'Пользователь',
+  sellerMemberId = 0,
 ): ProductItem {
   return {
     id: row.id,
@@ -63,6 +65,7 @@ function mapProduct(
     imageUrl: cleanText(row.image_url),
     createdAt: row.created_at,
     sellerName,
+    sellerMemberId,
     isRemovedByAdmin: Boolean(row.is_removed_by_admin),
     removedReason: cleanText(row.removed_reason),
     removedAt: row.removed_at,
@@ -94,20 +97,22 @@ export async function getProducts(sellerId?: string): Promise<ProductItem[]> {
 
   const sellerIds = Array.from(new Set(rows.map((item) => item.seller_id)));
   const sellerMap = new Map<string, string>();
+  const sellerMemberIdMap = new Map<string, number>();
 
   if (sellerIds.length > 0) {
     const { data: sellers } = await supabase
       .from('app_users')
-      .select('id, full_name, company_name, email')
+      .select('id, full_name, company_name, email, member_id')
       .in('id', sellerIds);
 
     (sellers ?? []).forEach((seller: any) => {
       const name = cleanText(seller.full_name) || cleanText(seller.company_name) || cleanText(seller.email) || 'Пользователь';
       sellerMap.set(seller.id, name);
+      if (typeof seller.member_id === 'number') sellerMemberIdMap.set(seller.id, seller.member_id);
     });
   }
 
-  return rows.map((row) => mapProduct(row, sellerMap.get(row.seller_id) ?? 'Пользователь'));
+  return rows.map((row) => mapProduct(row, sellerMap.get(row.seller_id) ?? 'Пользователь', sellerMemberIdMap.get(row.seller_id) ?? 0));
 }
 
 export async function getProductsForViewer(viewerId: string): Promise<ProductItem[]> {
@@ -126,20 +131,22 @@ export async function getProductsForViewer(viewerId: string): Promise<ProductIte
   const rows = (data ?? []) as RawProduct[];
   const sellerIds = Array.from(new Set(rows.map((item) => item.seller_id)));
   const sellerMap = new Map<string, string>();
+  const sellerMemberIdMap = new Map<string, number>();
 
   if (sellerIds.length > 0) {
     const { data: sellers } = await supabase
       .from('app_users')
-      .select('id, full_name, company_name, email')
+      .select('id, full_name, company_name, email, member_id')
       .in('id', sellerIds);
 
     (sellers ?? []).forEach((seller: any) => {
       const name = cleanText(seller.full_name) || cleanText(seller.company_name) || cleanText(seller.email) || 'Пользователь';
       sellerMap.set(seller.id, name);
+      if (typeof seller.member_id === 'number') sellerMemberIdMap.set(seller.id, seller.member_id);
     });
   }
 
-  return rows.map((row) => mapProduct(row, sellerMap.get(row.seller_id) ?? 'Пользователь'));
+  return rows.map((row) => mapProduct(row, sellerMap.get(row.seller_id) ?? 'Пользователь', sellerMemberIdMap.get(row.seller_id) ?? 0));
 }
 
 export async function createProduct(
@@ -161,7 +168,7 @@ export async function createProduct(
 
   const { data: profile, error: profileError } = await supabase
     .from('app_users')
-    .select('id, role, full_name, company_name, email')
+    .select('id, role, full_name, company_name, email, member_id')
     .eq('id', userId)
     .maybeSingle();
 
@@ -194,6 +201,7 @@ export async function createProduct(
   return mapProduct(
     row,
     cleanText(profile.full_name) || cleanText(profile.company_name) || cleanText(profile.email) || 'Пользователь',
+    typeof profile.member_id === 'number' ? profile.member_id : 0,
   );
 }
 
@@ -255,13 +263,14 @@ export async function updateProduct(
 
   const { data: profile } = await supabase
     .from('app_users')
-    .select('full_name, company_name, email')
+    .select('full_name, company_name, email, member_id')
     .eq('id', userId)
     .maybeSingle();
 
   const sellerName = cleanText(profile?.full_name) || cleanText(profile?.company_name) || cleanText(profile?.email) || 'Пользователь';
+  const sellerMemberId = typeof profile?.member_id === 'number' ? profile.member_id : 0;
 
-  return mapProduct(data as RawProduct, sellerName);
+  return mapProduct(data as RawProduct, sellerName, sellerMemberId);
 }
 
 export async function deleteProduct(userId: string, productId: string): Promise<void> {

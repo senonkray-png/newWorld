@@ -9,8 +9,10 @@ import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 type UserData = {
   id: string;
+  memberId: number;
   fullName: string;
   email: string;
+  isEmailVerified: boolean;
   avatarUrl: string;
   country: string;
   region: string;
@@ -111,6 +113,16 @@ export function UserPublicProfile({ locale, userId }: { locale: Locale; userId: 
             <h1 style={{ margin: '0 0 4px' }}>
               {user.fullName || user.email || (locale === 'en' ? 'User' : 'Пользователь')}
             </h1>
+            {user.memberId ? (
+              <p style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: 600, color: '#555' }}>
+                ID пайщика: {user.memberId}
+              </p>
+            ) : null}
+            {user.email && user.isEmailVerified ? (
+              <p style={{ margin: '0 0 4px', fontSize: '0.85rem', color: '#666' }}>
+                {user.email} ✓
+              </p>
+            ) : null}
             <p className="nm-profile-role-tag">{user.role}</p>
             {user.companyName ? <p style={{ margin: '4px 0 0' }}>{user.companyName}</p> : null}
           </div>
