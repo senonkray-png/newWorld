@@ -8,6 +8,7 @@ const legacyProviderRoles = ['Поставщик', 'Продавец', 'Пост
 
 export type AppUserProfile = {
   id: string;
+  memberId: number;
   email: string;
   isEmailVerified: boolean;
   fullName: string;
@@ -32,6 +33,7 @@ export type AppUserProfile = {
 
 export type AppUserContact = {
   id: string;
+  memberId: number;
   fullName: string;
   email: string;
   role: UserRoleRu;
@@ -41,6 +43,7 @@ export type AppUserContact = {
 
 export type AppUserDirectoryEntry = {
   id: string;
+  memberId: number;
   email: string;
   isEmailVerified: boolean;
   fullName: string;
@@ -62,6 +65,7 @@ export type AppUserDirectoryEntry = {
 
 type RawAppUser = {
   id: string;
+  member_id: number | null;
   email: string | null;
   is_email_verified: boolean | null;
   full_name: string | null;
@@ -123,6 +127,7 @@ function normalizeRole(value: unknown): UserRoleRu {
 function mapProfile(row: RawAppUser): AppUserProfile {
   return {
     id: row.id,
+    memberId: typeof row.member_id === 'number' ? row.member_id : 0,
     email: cleanText(row.email),
     isEmailVerified: Boolean(row.is_email_verified),
     fullName: cleanText(row.full_name),
@@ -150,6 +155,7 @@ function mapDirectoryEntry(row: RawAppUser): AppUserDirectoryEntry {
   const profile = mapProfile(row);
   return {
     id: profile.id,
+    memberId: profile.memberId,
     email: profile.email,
     isEmailVerified: profile.isEmailVerified,
     fullName: profile.fullName || profile.companyName || profile.email || 'Пользователь',
@@ -293,7 +299,7 @@ export async function listAppUserContacts(query: string, excludeUserId: string):
 
   let request = supabase
     .from('app_users')
-    .select('id, full_name, email, role, city, avatar_url')
+    .select('id, member_id, full_name, email, role, city, avatar_url')
     .neq('id', excludeUserId)
     .order('updated_at', { ascending: false })
     .limit(30);
@@ -309,6 +315,7 @@ export async function listAppUserContacts(query: string, excludeUserId: string):
 
   return (data ?? []).map((row: any) => ({
     id: row.id,
+    memberId: typeof row.member_id === 'number' ? row.member_id : 0,
     fullName: cleanText(row.full_name, cleanText(row.email, 'Пользователь')),
     email: cleanText(row.email),
     role: normalizeRole(row.role),
@@ -339,9 +346,16 @@ export async function searchAppUsers(
   }
 
   if (cleanQuery) {
-    request = request.or(
-      `full_name.ilike.%${cleanQuery}%,email.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,country.ilike.%${cleanQuery}%,company_name.ilike.%${cleanQuery}%,business_niche.ilike.%${cleanQuery}%`,
-    );
+    const numericQuery = Number(cleanQuery);
+    if (Number.isFinite(numericQuery) && numericQuery > 0 && String(numericQuery) === cleanQuery) {
+      request = request.or(
+        `member_id.eq.${numericQuery},full_name.ilike.%${cleanQuery}%,email.ilike.%${cleanQuery}%`,
+      );
+    } else {
+      request = request.or(
+        `full_name.ilike.%${cleanQuery}%,email.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,country.ilike.%${cleanQuery}%,company_name.ilike.%${cleanQuery}%,business_niche.ilike.%${cleanQuery}%`,
+      );
+    }
   }
 
   if (cleanInterest) {

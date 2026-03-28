@@ -212,6 +212,11 @@ function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+function isMemberId(value: string): boolean {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 && String(n) === value;
+}
+
 export async function resolveAppUserByIdOrEmail(raw: string): Promise<{ id: string; email: string } | null> {
   const trimmed = cleanText(raw);
   if (!trimmed) {
@@ -219,6 +224,23 @@ export async function resolveAppUserByIdOrEmail(raw: string): Promise<{ id: stri
   }
 
   const supabase = getSupabaseServiceClient() as any;
+
+  // Step 0: Try numeric member_id match (short public ID like 1001)
+  if (isMemberId(trimmed)) {
+    const { data: byMember, error: memberError } = await supabase
+      .from('app_users')
+      .select('id, email')
+      .eq('member_id', Number(trimmed))
+      .maybeSingle();
+
+    if (memberError) {
+      throw memberError;
+    }
+
+    if (byMember?.id) {
+      return { id: byMember.id, email: cleanText(byMember.email) };
+    }
+  }
 
   if (isUuid(trimmed)) {
     const { data, error } = await supabase

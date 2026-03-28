@@ -13,6 +13,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import type { UserRoleRu } from '@/lib/app-user-store';
 
 type ProfileFormState = {
+  memberId: number;
   email: string;
   isEmailVerified: boolean;
   fullName: string;
@@ -52,6 +53,7 @@ type ConversationPreview = {
 };
 
 const initialState: ProfileFormState = {
+  memberId: 0,
   email: '',
   isEmailVerified: false,
   fullName: '',
@@ -285,6 +287,7 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
 
     const payload = (await response.json()) as {
       profile?: {
+        memberId: number;
         email: string;
         isEmailVerified: boolean;
         fullName: string;
@@ -617,6 +620,12 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
                 <div className="nm-profile-view-grid">
                   <div className="nm-admin-card">
                     <h3>{t.basic}</h3>
+                    {form.memberId ? (
+                      <div className="nm-profile-row" style={{ background: 'rgba(255,255,255,0.06)', padding: '0.5rem 0.75rem', borderRadius: '6px', marginBottom: '0.75rem' }}>
+                        <strong style={{ fontSize: '0.85rem', opacity: 0.7 }}>ID пайщика:</strong>{' '}
+                        <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.05em' }}>{form.memberId}</span>
+                      </div>
+                    ) : null}
                     {form.avatarUrl ? <Image src={form.avatarUrl} alt="Avatar" width={120} height={120} className="nm-profile-avatar" unoptimized /> : null}
                     <InfoRow label="Email" value={form.email} />
                     <InfoRow label={form.isEmailVerified ? t.verified : t.notVerified} value={form.isEmailVerified ? t.yes : t.no} />
