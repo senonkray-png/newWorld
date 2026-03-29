@@ -347,6 +347,7 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
       if (!alive) return;
 
       if (!response.ok) {
+        if (response.status === 401) setToken(null);
         setMessagePreviews([]);
         setLoadingMessages(false);
         return;
@@ -368,6 +369,7 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
       if (!alive) return;
 
       if (!response.ok) {
+        if (response.status === 401) setToken(null);
         setNotifications([]);
         setLoadingNotifications(false);
         return;

@@ -148,7 +148,10 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
       headers: { Authorization: `Bearer ${currentToken}` },
     });
 
-    if (!response.ok) return;
+    if (!response.ok) {
+      if (response.status === 401) setToken('');
+      return;
+    }
 
     const payload = (await response.json()) as { conversations?: ConversationItem[] };
     setConversations(payload.conversations ?? []);
@@ -161,7 +164,10 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
       headers: { Authorization: `Bearer ${currentToken}` },
     });
 
-    if (!response.ok) return;
+    if (!response.ok) {
+      if (response.status === 401) setToken('');
+      return;
+    }
 
     const payload = (await response.json()) as { messages?: MessageItem[] };
     setMessages(payload.messages ?? []);
@@ -175,6 +181,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
       });
 
       if (!response.ok) {
+        if (response.status === 401) setToken('');
         setConversations([]);
         return;
       }

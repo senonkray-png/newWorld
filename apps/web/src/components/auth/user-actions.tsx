@@ -106,6 +106,7 @@ export function UserActions({ locale }: { locale: Locale }) {
       });
 
       if (!response.ok) {
+        if (response.status === 401) setAccessToken(null);
         setUnreadCount(0);
         return;
       }
@@ -147,6 +148,7 @@ export function UserActions({ locale }: { locale: Locale }) {
       });
 
       if (!alive || !response.ok) {
+        if (response.status === 401) setAccessToken(null);
         return;
       }
 
