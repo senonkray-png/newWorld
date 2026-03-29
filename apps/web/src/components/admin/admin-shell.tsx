@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { CoopRegistryExport } from '@/components/admin/coop-registry-export';
 import { DepositRequestsAdmin } from '@/components/admin/deposit-requests-admin';
+import { ProcessedPaymentsAdmin } from '@/components/admin/processed-payments-admin';
 import { WithdrawalRequestsAdmin } from '@/components/admin/withdrawal-requests-admin';
 import type { Locale } from '@/i18n/config';
 import type { HomeContent } from '@/i18n/home-content';
@@ -171,6 +172,7 @@ export function AdminShell({ locale }: { locale: Locale }) {
 
       {tab === 'deposits' && accessToken ? (
         <section className="nm-register-card" style={{ maxWidth: '900px' }}>
+          <ProcessedPaymentsAdmin accessToken={accessToken} />
           <DepositRequestsAdmin accessToken={accessToken} />
           <WithdrawalRequestsAdmin accessToken={accessToken} />
           <CoopRegistryExport accessToken={accessToken} />

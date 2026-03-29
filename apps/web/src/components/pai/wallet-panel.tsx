@@ -4,10 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { Locale } from '@/i18n/config';
 import {
-  computeDepositSplitPreview,
   type DepositRequestRow,
   type PaiTransactionRow,
-  PAI_UAH_PER_UNIT,
   type WithdrawalRequestRow,
 } from '@/lib/pai-store';
 
@@ -183,11 +181,8 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
   const [uahPerPai, setUahPerPai] = useState(5);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
-
-  const [uahInput, setUahInput] = useState('');
-  const [receiptUrl, setReceiptUrl] = useState('');
-  const [depositSubmitting, setDepositSubmitting] = useState(false);
-  const [uploadingReceipt, setUploadingReceipt] = useState(false);
+  const [memberId, setMemberId] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string>('');
 
   const [recipient, setRecipient] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
@@ -197,16 +192,12 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
   const [wdReason, setWdReason] = useState('');
   const [wdBusy, setWdBusy] = useState(false);
 
-  const uahNum = Number(String(uahInput).replace(',', '.'));
-
-  const splitPreview = useMemo(() => {
-    if (!Number.isFinite(uahNum) || uahNum <= 0) return null;
-    try {
-      return computeDepositSplitPreview(uahNum, completedDeposits, entranceUah, monthlyUah);
-    } catch {
-      return null;
-    }
-  }, [uahNum, completedDeposits, entranceUah, monthlyUah]);
+  /* Help modal state */
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpDesc, setHelpDesc] = useState('');
+  const [helpReceiptUrl, setHelpReceiptUrl] = useState('');
+  const [helpUploading, setHelpUploading] = useState(false);
+  const [helpBusy, setHelpBusy] = useState(false);
 
   const loadAll = useCallback(async () => {
     if (!token) {
@@ -243,11 +234,15 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
         completedDeposits?: number;
         entranceUah?: number;
         monthlyUah?: number;
+        memberId?: number;
+        userId?: string;
       };
       setBalancePai(typeof b.balancePai === 'number' ? b.balancePai : 0);
       if (typeof b.completedDeposits === 'number') setCompletedDeposits(b.completedDeposits);
       if (typeof b.entranceUah === 'number') setEntranceUah(b.entranceUah);
       if (typeof b.monthlyUah === 'number') setMonthlyUah(b.monthlyUah);
+      if (typeof b.memberId === 'number') setMemberId(b.memberId);
+      if (typeof b.userId === 'string') setUserId(b.userId);
     }
 
     if (coopRes.ok) {
@@ -277,64 +272,48 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
     void loadAll();
   }, [loadAll]);
 
-  /* Auto-poll every 30 s while there are pending deposits so the UI
-     refreshes automatically once Monobank cron approves the payment. */
+  /* Auto-poll every 30 s so the UI refreshes once Monobank cron processes payments */
   useEffect(() => {
-    const hasPending = depositRequests.some((d) => d.status === 'pending');
-    if (!hasPending) return;
+    if (!token) return;
     const id = setInterval(() => void loadAll(), 30_000);
     return () => clearInterval(id);
-  }, [depositRequests, loadAll]);
+  }, [token, loadAll]);
 
-  const uploadReceiptFile = async (file: File | null) => {
+  const uploadHelpReceipt = async (file: File | null) => {
     if (!file || !token) return;
-    setUploadingReceipt(true);
-    setStatus('');
+    setHelpUploading(true);
     const body = new FormData();
     body.append('file', file);
     body.append('folder', 'receipts');
     const res = await fetch('/api/upload', { method: 'POST', body });
-    setUploadingReceipt(false);
-    if (!res.ok) {
-      setStatus(locale === 'en' ? 'Upload failed' : locale === 'uk' ? 'Не вдалося завантажити' : 'Ошибка загрузки');
-      return;
-    }
+    setHelpUploading(false);
+    if (!res.ok) return;
     const payload = (await res.json()) as { url?: string };
-    if (payload.url) setReceiptUrl(payload.url);
+    if (payload.url) setHelpReceiptUrl(payload.url);
   };
 
-  const submitDeposit = async () => {
+  const submitHelpRequest = async () => {
     if (!token) return;
-    if (!receiptUrl.trim()) {
-      setStatus(locale === 'en' ? 'Attach a receipt image' : locale === 'uk' ? 'Додайте зображення чеку' : 'Прикрепите скриншот чека');
-      return;
-    }
-    if (!splitPreview) {
-      setStatus(locale === 'uk' ? 'Перевірте суму (перший внесок — не менше вступного + 5 грн)' : 'Check amount');
-      return;
-    }
-
-    setDepositSubmitting(true);
+    setHelpBusy(true);
     setStatus('');
-    const res = await fetch('/api/pai/deposit-request', {
+    const res = await fetch('/api/pai/help-request', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ amountUah: uahNum, receiptImageUrl: receiptUrl.trim() }),
+      body: JSON.stringify({ description: helpDesc.trim(), receiptUrl: helpReceiptUrl }),
     });
-    setDepositSubmitting(false);
-
-    if (!res.ok) {
+    setHelpBusy(false);
+    if (res.ok) {
+      setHelpOpen(false);
+      setHelpDesc('');
+      setHelpReceiptUrl('');
+      setStatus(locale === 'en' ? 'Help request sent!' : locale === 'uk' ? 'Запит надіслано!' : 'Запрос отправлен!');
+    } else {
       const err = (await res.json().catch(() => ({}))) as { error?: string };
       setStatus(err.error ?? 'Error');
-      return;
     }
-
-    setUahInput('');
-    setReceiptUrl('');
-    await loadAll();
   };
 
   const submitTransfer = async () => {
@@ -431,87 +410,66 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
 
           <div className="nm-admin-card" style={{ marginTop: '1rem' }}>
             <h3>{t.contribute}</h3>
-            <p className="nm-admin-hint" style={{ whiteSpace: 'pre-wrap' }}>
-              {paymentDetails}
-            </p>
-            <p className="nm-admin-hint">
-              {locale === 'uk'
-                ? `Курс: ${uahPerPai} грн = 1 паєва одиниця. Вступний: ${entranceUah} грн. Членський (наступні внески): ${monthlyUah} грн.`
-                : locale === 'en'
-                  ? `Rate: ${uahPerPai} UAH = 1 cooperative unit. Entrance: ${entranceUah} UAH. Membership (later): ${monthlyUah} UAH.`
-                  : `Курс: ${uahPerPai} грн = 1 паевая единица. Вступительный: ${entranceUah} грн. Членский (последующие взносы): ${monthlyUah} грн.`}
-            </p>
-            <label className="nm-admin-field">
-              <span>{t.amountUah}</span>
-              <input
-                type="number"
-                min={PAI_UAH_PER_UNIT}
-                step="0.01"
-                value={uahInput}
-                onChange={(e) => setUahInput(e.target.value)}
-              />
-            </label>
-            {splitPreview ? (
-              <p className="nm-admin-hint">
-                {t.expectedUnits}: <strong>{splitPreview.previewPai.toFixed(2)}</strong>
-                <br />
-                {splitPreview.isFirst
-                  ? `Вступний (незворотний): ${splitPreview.entranceUah.toFixed(2)} грн → паєві: ${splitPreview.convertUah.toFixed(2)} грн`
-                  : `Членський (незворотний): ${splitPreview.membershipUah.toFixed(2)} грн → паєві: ${splitPreview.convertUah.toFixed(2)} грн`}
+
+            {/* Інструкція з ID користувача */}
+            <div style={{ marginBottom: '1rem', padding: '1rem', background: 'rgba(59,130,246,0.08)', borderRadius: '0.5rem', border: '1px solid rgba(59,130,246,0.2)' }}>
+              <p style={{ margin: '0 0 0.75rem', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                {locale === 'en'
+                  ? `To top up your share account, press the button below. In the payment comment you MUST enter your ID: `
+                  : locale === 'uk'
+                    ? `Для поповнення пайового рахунку натисніть кнопку нижче. У вікні оплати обов'язково вкажіть ваш ID: `
+                    : `Для пополнения паевого счёта нажмите кнопку ниже. В окне оплаты обязательно укажите ваш ID: `}
+                <strong style={{ fontSize: '1.2rem', color: '#3b82f6', userSelect: 'all' }}>
+                  {memberId ?? userId}
+                </strong>
+                {locale === 'en'
+                  ? ` in the "Comment" field. Rate: ${uahPerPai} UAH = 1 unit.`
+                  : locale === 'uk'
+                    ? ` у полі «Коментар». Курс: ${uahPerPai} грн = 1 Пай.`
+                    : ` в поле «Комментарий». Курс: ${uahPerPai} грн = 1 Пай.`}
               </p>
-            ) : uahInput ? (
-              <p className="nm-admin-status">
-                {locale === 'uk'
-                  ? `Перший внесок: мінімум ${entranceUah + PAI_UAH_PER_UNIT} грн.`
-                  : `First contribution: at least ${entranceUah + PAI_UAH_PER_UNIT} UAH.`}
-              </p>
-            ) : null}
-            <div className="nm-admin-field">
-              <span>{t.receipt}</span>
-              {receiptUrl ? (
-                <p>
-                  <a href={receiptUrl} target="_blank" rel="noreferrer">
-                    {receiptUrl.slice(0, 60)}…
-                  </a>
-                </p>
-              ) : null}
-              <input type="file" accept="image/*" onChange={(e) => void uploadReceiptFile(e.target.files?.[0] ?? null)} disabled={uploadingReceipt} />
-              <small className="nm-admin-hint">{uploadingReceipt ? '...' : t.uploadReceipt}</small>
-            </div>
-            <div className="nm-admin-actions">
-              <button type="button" className="nm-btn nm-btn-primary" onClick={() => void submitDeposit()} disabled={depositSubmitting || !splitPreview}>
-                {depositSubmitting ? t.submitting : t.submitRequest}
-              </button>
+
+              <a
+                href="https://send.monobank.ua/jar/ACmrfEtm4C"
+                target="_blank"
+                rel="noreferrer"
+                className="nm-btn nm-btn-primary"
+                style={{ display: 'inline-block', fontSize: '1.1rem', padding: '0.75rem 1.5rem', textDecoration: 'none', textAlign: 'center' }}
+              >
+                {locale === 'en'
+                  ? '💳 Top up balance'
+                  : locale === 'uk'
+                    ? '💳 Поповнити баланс'
+                    : '💳 Пополнить баланс'}
+              </a>
             </div>
 
-            <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(59,130,246,0.08)', borderRadius: '0.5rem', border: '1px solid rgba(59,130,246,0.2)' }}>
-              <p style={{ fontWeight: 700, fontSize: '1rem', margin: '0 0 0.5rem' }}>
+            {/* Блок допомоги */}
+            <div style={{ padding: '0.75rem', background: 'rgba(250,204,21,0.08)', borderRadius: '0.5rem', border: '1px solid rgba(250,204,21,0.25)' }}>
+              <p style={{ margin: '0 0 0.5rem', fontSize: '0.9rem' }}>
                 {locale === 'en'
-                  ? '💳 Payment via Monobank jar'
+                  ? 'If your units were not credited or you made a mistake in the ID — press '
                   : locale === 'uk'
-                    ? '💳 Оплата через банку Monobank'
-                    : '💳 Оплата через банку Monobank'}
-              </p>
-              <p style={{ margin: '0 0 0.4rem' }}>
-                {locale === 'en'
-                  ? 'Send payment to the jar link below. In the comment field, you MUST enter the code from your deposit request (e.g. PAI-1234). Payment is verified automatically within 2–5 minutes.'
-                  : locale === 'uk'
-                    ? 'Надішліть оплату на банку за посиланням нижче. В коментарі до платежу ОБОВ\'ЯЗКОВО вкажіть код із заявки (наприклад PAI-1234). Оплата перевіряється автоматично протягом 2–5 хвилин.'
-                    : 'Отправьте оплату на банку по ссылке ниже. В комментарии к платежу ОБЯЗАТЕЛЬНО укажите код из заявки (например PAI-1234). Оплата проверяется автоматически в течение 2–5 минут.'}
-              </p>
-              <p style={{ margin: '0 0 0.25rem' }}>
-                <a href="https://send.monobank.ua/jar/9G4acTn9o5" target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>
-                  🔗 send.monobank.ua/jar/9G4acTn9o5
-                </a>
-              </p>
-              <p style={{ margin: '0', fontSize: '0.85rem', opacity: 0.7 }}>
-                {locale === 'en'
-                  ? 'Card: 4441 1111 2604 7681'
-                  : locale === 'uk'
-                    ? 'Картка: 4441 1111 2604 7681'
-                    : 'Карта: 4441 1111 2604 7681'}
+                    ? 'Якщо паї не зарахувались або ви помилилися в ID — натисніть '
+                    : 'Если паи не зачислились или вы ошиблись в ID — нажмите '}
+                <button
+                  type="button"
+                  className="nm-btn nm-btn-secondary nm-btn-sm"
+                  style={{ fontSize: '0.85rem' }}
+                  onClick={() => setHelpOpen(true)}
+                >
+                  {locale === 'en' ? '❓ Help' : locale === 'uk' ? '❓ Допомога' : '❓ Помощь'}
+                </button>
               </p>
             </div>
+
+            <p className="nm-admin-hint" style={{ marginTop: '0.75rem' }}>
+              {locale === 'uk'
+                ? `Курс: ${uahPerPai} грн = 1 паєва одиниця. Оплата перевіряється автоматично кожні 2–5 хвилин.`
+                : locale === 'en'
+                  ? `Rate: ${uahPerPai} UAH = 1 cooperative unit. Payment is verified automatically every 2–5 minutes.`
+                  : `Курс: ${uahPerPai} грн = 1 паевая единица. Оплата проверяется автоматически каждые 2–5 минут.`}
+            </p>
           </div>
 
           <div className="nm-admin-card" style={{ marginTop: '1rem' }}>
@@ -564,69 +522,30 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
             </ul>
           </div>
 
-          <div className="nm-admin-card" style={{ marginTop: '1rem' }}>
-            <h3>{t.depositStatus}</h3>
-            {depositRequests.length === 0 ? <p className="nm-admin-hint">—</p> : null}
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              {depositRequests.map((d) => (
-                <li key={d.id} style={{ marginBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.5rem' }}>
-                  <strong>{d.amountUah.toFixed(2)} грн</strong> → прев&apos;ю {d.amountPai.toFixed(2)} од. —{' '}
-                  {d.status === 'pending' ? t.pending : d.status === 'completed' ? t.completed : t.rejected}
-                  {d.adminComment ? ` (${d.adminComment})` : ''}
-                  {d.paymentCode && d.status === 'pending' ? (
-                    <div style={{ marginTop: '0.4rem', padding: '0.5rem', background: 'rgba(250,204,21,0.12)', borderRadius: '0.4rem', border: '1px solid rgba(250,204,21,0.3)' }}>
-                      <p style={{ margin: '0 0 0.25rem', fontWeight: 700, fontSize: '1.1rem' }}>
-                        {locale === 'en'
-                          ? `📋 Payment code: ${d.paymentCode}`
-                          : locale === 'uk'
-                            ? `📋 Код для коментаря: ${d.paymentCode}`
-                            : `📋 Код для комментария: ${d.paymentCode}`}
-                      </p>
-                      <p style={{ margin: '0 0 0.25rem', fontSize: '0.85rem' }}>
-                        {locale === 'en'
-                          ? 'Enter this code in the payment comment. Verification takes 2–5 min.'
-                          : locale === 'uk'
-                            ? 'Вкажіть цей код у коментарі до платежу. Перевірка займає 2–5 хв.'
-                            : 'Укажите этот код в комментарии к платежу. Проверка занимает 2–5 мин.'}
-                      </p>
-                      <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.6 }}>
-                        ⏳ {locale === 'en'
-                          ? 'Awaiting payment confirmation...'
-                          : locale === 'uk'
-                            ? 'Очікуємо підтвердження оплати…'
-                            : 'Ожидаем подтверждение оплаты…'}
-                      </p>
-                    </div>
-                  ) : null}
-                  {d.appliedBreakdown && d.status === 'completed' ? (
-                    <small>
-                      <br />
-                      {locale === 'uk'
-                        ? `Зараховано: ${String(d.appliedBreakdown.pai_credited ?? '')} од.; вступний ${String(d.appliedBreakdown.entrance_uah ?? '')} грн; членський ${String(d.appliedBreakdown.membership_uah ?? '')} грн`
-                        : `Applied: ${String(d.appliedBreakdown.pai_credited ?? '')} units`}
-                    </small>
-                  ) : null}
-                  <br />
-                  <small>{formatDate(locale, d.createdAt)}</small>
-                </li>
-              ))}
-            </ul>
-            {depositRequests.some((d) => d.status === 'pending') ? (
-              <div style={{ marginTop: '0.5rem' }}>
-                <a
-                  href={`/${locale}/messages`}
-                  className="nm-btn nm-btn-secondary nm-btn-sm"
-                  style={{ display: 'inline-block' }}
-                >
-                  {locale === 'en'
-                    ? '❓ I paid but didn\'t receive units'
-                    : locale === 'uk'
-                      ? '❓ Я оплатив, але одиниці не надійшли'
-                      : '❓ Я оплатил, но единицы не пришли'}
-                </a>
-              </div>
-            ) : null}
-          </div>
+          {depositRequests.length > 0 && (
+            <div className="nm-admin-card" style={{ marginTop: '1rem' }}>
+              <h3>{t.depositStatus}</h3>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {depositRequests.map((d) => (
+                  <li key={d.id} style={{ marginBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.5rem' }}>
+                    <strong>{d.amountUah.toFixed(2)} грн</strong> → {d.amountPai.toFixed(2)} од. —{' '}
+                    {d.status === 'pending' ? t.pending : d.status === 'completed' ? t.completed : t.rejected}
+                    {d.adminComment ? ` (${d.adminComment})` : ''}
+                    {d.appliedBreakdown && d.status === 'completed' ? (
+                      <small>
+                        <br />
+                        {locale === 'uk'
+                          ? `Зараховано: ${String(d.appliedBreakdown.pai_credited ?? '')} од.; вступний ${String(d.appliedBreakdown.entrance_uah ?? '')} грн; членський ${String(d.appliedBreakdown.membership_uah ?? '')} грн`
+                          : `Applied: ${String(d.appliedBreakdown.pai_credited ?? '')} units`}
+                      </small>
+                    ) : null}
+                    <br />
+                    <small>{formatDate(locale, d.createdAt)}</small>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="nm-admin-card" style={{ marginTop: '1rem' }}>
             <h3>{t.history}</h3>
@@ -661,6 +580,68 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
       )}
 
       {status ? <p className="nm-admin-status">{status}</p> : null}
+
+      {/* Help modal */}
+      {helpOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+          <div style={{ background: 'var(--nm-card-bg, #1e293b)', borderRadius: '0.75rem', padding: '1.5rem', width: '100%', maxWidth: '28rem', position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setHelpOpen(false)}
+              style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'transparent', border: 'none', color: 'inherit', fontSize: '1.25rem', cursor: 'pointer' }}
+              aria-label="Close"
+            >✕</button>
+            <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>
+              {locale === 'en' ? 'Payment problem' : locale === 'uk' ? 'Проблема з оплатою' : 'Проблема с оплатой'}
+            </h3>
+            <label className="nm-admin-field">
+              <span>
+                {locale === 'en' ? 'Describe the problem' : locale === 'uk' ? 'Опишіть проблему' : 'Опишите проблему'}
+              </span>
+              <textarea
+                rows={3}
+                value={helpDesc}
+                onChange={(e) => setHelpDesc(e.target.value)}
+                placeholder={locale === 'en' ? 'e.g. paid 100 UAH, forgot to include ID...' : locale === 'uk' ? 'напр. оплатив 100 грн, забув ID…' : 'напр. оплатил 100 грн, забыл ID…'}
+              />
+            </label>
+            <label className="nm-admin-field" style={{ marginTop: '0.75rem' }}>
+              <span>
+                {locale === 'en' ? 'Receipt screenshot (optional)' : locale === 'uk' ? 'Скриншот чеку (необов\u2019язково)' : 'Скриншот чека (необязательно)'}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                disabled={helpUploading}
+                onChange={(e) => void uploadHelpReceipt(e.target.files?.[0] ?? null)}
+              />
+              {helpUploading && <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>⏳</span>}
+              {helpReceiptUrl && (
+                <img src={helpReceiptUrl} alt="receipt" style={{ marginTop: '0.5rem', maxHeight: '8rem', borderRadius: '0.4rem' }} />
+              )}
+            </label>
+            <div className="nm-admin-actions" style={{ marginTop: '1rem' }}>
+              <button
+                type="button"
+                className="nm-btn nm-btn-primary"
+                disabled={helpBusy || !helpDesc.trim()}
+                onClick={() => void submitHelpRequest()}
+              >
+                {helpBusy
+                  ? (locale === 'en' ? 'Sending...' : locale === 'uk' ? 'Надсилання...' : 'Отправка...')
+                  : (locale === 'en' ? 'Send request' : locale === 'uk' ? 'Надіслати запит' : 'Отправить запрос')}
+              </button>
+              <button
+                type="button"
+                className="nm-btn nm-btn-secondary"
+                onClick={() => setHelpOpen(false)}
+              >
+                {locale === 'en' ? 'Cancel' : locale === 'uk' ? 'Скасувати' : 'Отмена'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

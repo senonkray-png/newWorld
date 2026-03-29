@@ -1,7 +1,9 @@
-import { getCoopFundConfig } from '@/lib/coop-config';
 import { getSupabaseServiceClient } from '@/lib/supabase-service';
 
 const MONO_API = 'https://api.monobank.ua';
+
+/** Курс: 5 грн = 1 пай (500 копійок = 1 пай) */
+const KOPIYKY_PER_PAI = 500;
 
 function getMonoToken(): string {
   const token = process.env.MONO_TOKEN;
@@ -46,113 +48,169 @@ async function fetchStatements(hours = 24): Promise<MonoStatement[]> {
 }
 
 /**
- * Витягти код PAI-XXXX з коментаря або опису до платежу.
- * Monobank може записати код як у comment, так і в description.
+ * Витягти числовий user ID з тексту коментаря / опису.
+ * Шукає member_id (наприклад 1001) або UUID.
  */
-function extractPaymentCode(comment: string | undefined, description: string | undefined): string | null {
+function extractUserId(comment: string | undefined, description: string | undefined): string | null {
   for (const text of [comment, description]) {
     if (!text) continue;
-    const match = text.match(/PAI-(\d{4,})/i);
-    if (match) return `PAI-${match[1]}`;
+    // UUID
+    const uuidMatch = text.match(/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i);
+    if (uuidMatch) return uuidMatch[0];
+    // Числовий member_id (наприклад 1001, 1042)
+    const numMatch = text.match(/\b(\d{4,})\b/);
+    if (numMatch) return numMatch[1];
   }
   return null;
 }
 
-type PendingDeposit = {
-  id: string;
-  user_id: string;
-  amount_uah: number;
-  payment_code: string;
-};
+/**
+ * Знайти користувача за member_id або UUID.
+ */
+async function resolveUser(supabase: any, rawId: string): Promise<{ id: string } | null> {
+  // Спочатку перевіримо member_id (числовий)
+  const memberId = Number(rawId);
+  if (Number.isFinite(memberId) && memberId > 0 && String(memberId) === rawId) {
+    const { data } = await supabase
+      .from('app_users')
+      .select('id')
+      .eq('member_id', memberId)
+      .maybeSingle();
+    if (data?.id) return { id: data.id };
+  }
+
+  // UUID
+  if (/^[0-9a-f]{8}-/i.test(rawId)) {
+    const { data } = await supabase
+      .from('app_users')
+      .select('id')
+      .eq('id', rawId)
+      .maybeSingle();
+    if (data?.id) return { id: data.id };
+  }
+
+  return null;
+}
 
 /**
- * Основна логіка: зіставити транзакції Monobank із pending-заявками.
- * Повертає кількість зарахованих заявок.
+ * Основна логіка:
+ * 1. Отримати виписку з банки Monobank.
+ * 2. Для кожної транзакції перевірити чи вже оброблена (bank_transaction_id).
+ * 3. Знайти user ID у коментарі.
+ * 4. Якщо знайдено — нарахувати паї (сума / 500 копійок).
+ * 5. Якщо не розпізнано — записати як manual_pending для адміна.
  */
-export async function runMonoCheck(): Promise<{ matched: number; checked: number; errors: string[] }> {
+export async function runMonoCheck(): Promise<{ matched: number; manual: number; checked: number; errors: string[] }> {
   const supabase = getSupabaseServiceClient() as any;
 
-  // 1. Отримати pending-заявки з payment_code
-  const { data: pendingRows, error: pendingErr } = await supabase
-    .from('deposit_requests')
-    .select('id, user_id, amount_uah, payment_code')
-    .eq('status', 'pending')
-    .not('payment_code', 'is', null);
-
-  if (pendingErr) throw pendingErr;
-  if (!pendingRows || pendingRows.length === 0) {
-    return { matched: 0, checked: 0, errors: [] };
-  }
-
-  const pending = pendingRows as PendingDeposit[];
-  const codeMap = new Map<string, PendingDeposit>();
-  for (const row of pending) {
-    if (row.payment_code) {
-      codeMap.set(row.payment_code.toUpperCase(), row);
-    }
-  }
-
-  // 2. Отримати виписку з банки
   const statements = await fetchStatements(24);
 
   const errors: string[] = [];
   let matched = 0;
-
-  const { entranceUah, monthlyUah } = getCoopFundConfig();
+  let manual = 0;
 
   for (const tx of statements) {
     // Пропускаємо витрати (amount < 0)
     if (tx.amount <= 0) continue;
 
-    const code = extractPaymentCode(tx.comment, tx.description);
-    if (!code) continue;
-
-    const deposit = codeMap.get(code.toUpperCase());
-    if (!deposit) continue;
-
-    const txAmountUah = tx.amount / 100; // копійки → гривні
-
-    // Перевірити, що сума збігається (з допуском ±1 грн на комісію)
-    if (Math.abs(txAmountUah - deposit.amount_uah) > 1) continue;
-
-    // Перевірити, що ця транзакція ще не була оброблена
+    // Перевірити чи транзакція вже оброблена
     const { data: existing } = await supabase
-      .from('deposit_requests')
+      .from('processed_payments')
       .select('id')
-      .eq('mono_tx_id', tx.id)
+      .eq('bank_transaction_id', tx.id)
       .maybeSingle();
 
-    if (existing) continue; // вже зараховано
+    if (existing) continue;
 
-    // 3. Записати mono_tx_id, потім підтвердити через RPC
-    try {
-      const { error: updateErr } = await supabase
-        .from('deposit_requests')
-        .update({ mono_tx_id: tx.id })
-        .eq('id', deposit.id);
+    const amountUah = tx.amount / 100;
+    const amountPai = Math.round((tx.amount / KOPIYKY_PER_PAI) * 100) / 100;
+    const rawComment = [tx.comment, tx.description].filter(Boolean).join(' | ');
 
-      if (updateErr) {
-        errors.push(`Update mono_tx_id failed for ${deposit.id}: ${updateErr.message}`);
-        continue;
+    // Спробувати знайти user ID у коментарі
+    const rawId = extractUserId(tx.comment, tx.description);
+    const user = rawId ? await resolveUser(supabase, rawId) : null;
+
+    if (user) {
+      // Автоматичне нарахування
+      try {
+        // Запис у processed_payments
+        const { error: insertErr } = await supabase
+          .from('processed_payments')
+          .insert({
+            bank_transaction_id: tx.id,
+            user_id: user.id,
+            amount_uah: amountUah,
+            amount_pai: amountPai,
+            comment_raw: rawComment,
+            status: 'success',
+            mono_time: tx.time,
+            resolved_at: new Date().toISOString(),
+          });
+
+        if (insertErr) {
+          errors.push(`Insert processed_payment failed: ${insertErr.message}`);
+          continue;
+        }
+
+        // Запис у pai_transactions
+        await supabase
+          .from('pai_transactions')
+          .insert({
+            user_id: user.id,
+            type: 'deposit',
+            amount: amountPai,
+            status: 'completed',
+            meta: {
+              source: 'monobank_auto',
+              bank_tx_id: tx.id,
+              amount_uah: amountUah,
+            },
+          });
+
+        // Оновити баланс
+        const { data: currentUser } = await supabase
+          .from('app_users')
+          .select('balance_pai')
+          .eq('id', user.id)
+          .single();
+
+        if (currentUser) {
+          const newBalance = (Number(currentUser.balance_pai) || 0) + amountPai;
+          await supabase
+            .from('app_users')
+            .update({ balance_pai: newBalance })
+            .eq('id', user.id);
+        }
+
+        matched++;
+      } catch (e) {
+        errors.push(`Auto-approve error for tx ${tx.id}: ${e instanceof Error ? e.message : String(e)}`);
       }
+    } else {
+      // Не розпізнано — manual_pending
+      try {
+        const { error: insertErr } = await supabase
+          .from('processed_payments')
+          .insert({
+            bank_transaction_id: tx.id,
+            user_id: null,
+            amount_uah: amountUah,
+            amount_pai: 0,
+            comment_raw: rawComment,
+            status: 'manual_pending',
+            mono_time: tx.time,
+          });
 
-      const { error: rpcErr } = await supabase.rpc('pai_approve_deposit', {
-        p_request_id: deposit.id,
-        p_entrance_uah: entranceUah,
-        p_monthly_uah: monthlyUah,
-      });
-
-      if (rpcErr) {
-        errors.push(`RPC approve failed for ${deposit.id}: ${rpcErr.message}`);
-        continue;
+        if (insertErr) {
+          errors.push(`Insert manual_pending failed: ${insertErr.message}`);
+          continue;
+        }
+        manual++;
+      } catch (e) {
+        errors.push(`Manual insert error: ${e instanceof Error ? e.message : String(e)}`);
       }
-
-      matched++;
-      codeMap.delete(code.toUpperCase()); // не зараховувати двічі
-    } catch (e) {
-      errors.push(`Error for ${deposit.id}: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
-  return { matched, checked: statements.length, errors };
+  return { matched, manual, checked: statements.length, errors };
 }
