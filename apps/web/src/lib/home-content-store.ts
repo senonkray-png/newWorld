@@ -21,6 +21,10 @@ function cleanFeature(value: unknown, fallback: HomeFeature): HomeFeature {
     title: cleanText(input.title, fallback.title),
     text: cleanText(input.text, fallback.text),
     icon: cleanText(input.icon, fallback.icon),
+    headerFontSize: typeof input.headerFontSize === 'number' ? input.headerFontSize : undefined,
+    descFontSize: typeof input.descFontSize === 'number' ? input.descFontSize : undefined,
+    extraContent: typeof input.extraContent === 'string' && input.extraContent.trim() ? input.extraContent : undefined,
+    isNewPage: typeof input.isNewPage === 'boolean' ? input.isNewPage : false,
   };
 }
 

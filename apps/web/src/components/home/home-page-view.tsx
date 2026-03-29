@@ -2,14 +2,82 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 
-import { type HomeContent } from '@/i18n/home-content';
+import { type HomeContent, type HomeFeature } from '@/i18n/home-content';
 import type { Locale } from '@/i18n/config';
 
 type HomePageViewProps = {
   locale: Locale;
   content: HomeContent;
 };
+
+function InfoCard({
+  item,
+  index,
+  locale,
+  section,
+}: {
+  item: HomeFeature;
+  index: number;
+  locale: Locale;
+  section: 'feature' | 'process';
+}) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const hasExtra = !!(item.extraContent ?? '').trim();
+  const isClickable = hasExtra;
+
+  const headerStyle = item.headerFontSize ? { fontSize: `${item.headerFontSize}px` } : undefined;
+  const descStyle = item.descFontSize ? { fontSize: `${item.descFontSize}px` } : undefined;
+
+  const card = (
+    <article
+      className={`${section === 'feature' ? 'nm-panel' : 'nm-process-card'} nm-reveal${isClickable ? ' nm-card-interactive' : ''}`}
+      style={{ animationDelay: `${index * (section === 'feature' ? 90 : 80)}ms`, cursor: isClickable ? 'pointer' : undefined }}
+      onClick={isClickable && !item.isNewPage ? () => setModalOpen(true) : undefined}
+    >
+      <Image src={item.icon} alt="" width={section === 'feature' ? 42 : 38} height={section === 'feature' ? 42 : 38} />
+      <h3 style={headerStyle}>{item.title}</h3>
+      <p style={descStyle}>{item.text}</p>
+    </article>
+  );
+
+  if (isClickable && item.isNewPage) {
+    return (
+      <>
+        <Link href={`/${locale}/info/${section}-${index}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+          {card}
+        </Link>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {card}
+      {modalOpen && hasExtra && (
+        <div
+          className="nm-modal-overlay"
+          onClick={() => setModalOpen(false)}
+        >
+          <div
+            className="nm-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="nm-modal-close"
+              onClick={() => setModalOpen(false)}
+              aria-label="Close"
+            >✕</button>
+            <h2 style={headerStyle}>{item.title}</h2>
+            <div dangerouslySetInnerHTML={{ __html: item.extraContent! }} />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 export function HomePageView({ locale, content }: HomePageViewProps) {
   return (
@@ -33,11 +101,7 @@ export function HomePageView({ locale, content }: HomePageViewProps) {
         <h2 className="nm-section-title nm-reveal">{content.featureTitle}</h2>
         <div className="nm-grid nm-grid-4">
           {content.featureItems.map((item, index) => (
-            <article key={`${item.title}-${index}`} className="nm-panel nm-reveal" style={{ animationDelay: `${index * 90}ms` }}>
-              <Image src={item.icon} alt="" width={42} height={42} />
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
+            <InfoCard key={`${item.title}-${index}`} item={item} index={index} locale={locale} section="feature" />
           ))}
         </div>
       </section>
@@ -46,11 +110,7 @@ export function HomePageView({ locale, content }: HomePageViewProps) {
         <h2 className="nm-section-title nm-reveal">{content.processTitle}</h2>
         <div className="nm-grid nm-grid-3">
           {content.processItems.map((item, index) => (
-            <article key={`${item.title}-${index}`} className="nm-process-card nm-reveal" style={{ animationDelay: `${index * 80}ms` }}>
-              <Image src={item.icon} alt="" width={38} height={38} />
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
+            <InfoCard key={`${item.title}-${index}`} item={item} index={index} locale={locale} section="process" />
           ))}
         </div>
       </section>

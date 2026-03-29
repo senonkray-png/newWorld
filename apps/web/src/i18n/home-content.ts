@@ -4,6 +4,10 @@ export type HomeFeature = {
   title: string;
   text: string;
   icon: string;
+  headerFontSize?: number;
+  descFontSize?: number;
+  extraContent?: string;
+  isNewPage?: boolean;
 };
 
 export type HomeButton = {

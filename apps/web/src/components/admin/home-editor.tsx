@@ -146,7 +146,7 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
     }
   };
 
-  const updateFeature = (index: number, key: 'title' | 'text' | 'icon', value: string) => {
+  const updateFeature = (index: number, key: keyof import('@/i18n/home-content').HomeFeature, value: string | number | boolean) => {
     setContent((prev) => ({
       ...prev,
       featureItems: prev.featureItems.map((item, itemIndex) =>
@@ -155,7 +155,7 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
     }));
   };
 
-  const updateProcess = (index: number, key: 'title' | 'text' | 'icon', value: string) => {
+  const updateProcess = (index: number, key: keyof import('@/i18n/home-content').HomeFeature, value: string | number | boolean) => {
     setContent((prev) => ({
       ...prev,
       processItems: prev.processItems.map((item, itemIndex) =>
@@ -274,6 +274,24 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
                 onFileSelect={(file) => handleImageUploadGeneric(file, (url) => updateFeature(index, 'icon', url))}
                 isLoading={uploadingImage !== null}
               />
+              <label className="nm-admin-field">
+                <span>Размер шрифта заголовка: {item.headerFontSize ?? 18}px</span>
+                <input type="range" min={14} max={48} value={item.headerFontSize ?? 18} onChange={(e) => updateFeature(index, 'headerFontSize', Number(e.target.value))} />
+              </label>
+              <label className="nm-admin-field">
+                <span>Размер шрифта описания: {item.descFontSize ?? 14}px</span>
+                <input type="range" min={12} max={24} value={item.descFontSize ?? 14} onChange={(e) => updateFeature(index, 'descFontSize', Number(e.target.value))} />
+              </label>
+              <label className="nm-admin-field">
+                <span>Дополнительная информация (HTML)</span>
+                <textarea rows={4} value={item.extraContent ?? ''} onChange={(e) => updateFeature(index, 'extraContent', e.target.value)} placeholder="Если заполнено — карточка станет кликабельной" />
+              </label>
+              {(item.extraContent ?? '').trim() && (
+                <label className="nm-admin-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem' }}>
+                  <span>Открывать на новой странице</span>
+                  <input type="checkbox" checked={item.isNewPage ?? false} onChange={(e) => updateFeature(index, 'isNewPage', e.target.checked)} />
+                </label>
+              )}
             </div>
           ))}
         </div>
@@ -293,6 +311,24 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
                 onFileSelect={(file) => handleImageUploadGeneric(file, (url) => updateProcess(index, 'icon', url))}
                 isLoading={uploadingImage !== null}
               />
+              <label className="nm-admin-field">
+                <span>Размер шрифта заголовка: {item.headerFontSize ?? 18}px</span>
+                <input type="range" min={14} max={48} value={item.headerFontSize ?? 18} onChange={(e) => updateProcess(index, 'headerFontSize', Number(e.target.value))} />
+              </label>
+              <label className="nm-admin-field">
+                <span>Размер шрифта описания: {item.descFontSize ?? 14}px</span>
+                <input type="range" min={12} max={24} value={item.descFontSize ?? 14} onChange={(e) => updateProcess(index, 'descFontSize', Number(e.target.value))} />
+              </label>
+              <label className="nm-admin-field">
+                <span>Дополнительная информация (HTML)</span>
+                <textarea rows={4} value={item.extraContent ?? ''} onChange={(e) => updateProcess(index, 'extraContent', e.target.value)} placeholder="Если заполнено — карточка станет кликабельной" />
+              </label>
+              {(item.extraContent ?? '').trim() && (
+                <label className="nm-admin-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem' }}>
+                  <span>Открывать на новой странице</span>
+                  <input type="checkbox" checked={item.isNewPage ?? false} onChange={(e) => updateProcess(index, 'isNewPage', e.target.checked)} />
+                </label>
+              )}
             </div>
           ))}
         </div>
