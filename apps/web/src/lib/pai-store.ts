@@ -308,8 +308,25 @@ export async function createDepositRequest(
 
   const supabase = getSupabaseServiceClient() as any;
 
-  // Generate unique payment code PAI-XXXX
-  const paymentCode = `PAI-${String(Math.floor(1000 + Math.random() * 9000))}`;
+  // Generate unique payment code PAI-XXXX with collision retry
+  let paymentCode = '';
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const candidate = `PAI-${String(Math.floor(1000 + Math.random() * 9000))}`;
+    const { data: existing } = await supabase
+      .from('deposit_requests')
+      .select('id')
+      .eq('payment_code', candidate)
+      .eq('status', 'pending')
+      .maybeSingle();
+    if (!existing) {
+      paymentCode = candidate;
+      break;
+    }
+  }
+  if (!paymentCode) {
+    // Fallback: use timestamp-based code to guarantee uniqueness
+    paymentCode = `PAI-${String(Date.now()).slice(-6)}`;
+  }
 
   const { data, error } = await supabase
     .from('deposit_requests')

@@ -46,12 +46,16 @@ async function fetchStatements(hours = 24): Promise<MonoStatement[]> {
 }
 
 /**
- * Витягти код PAI-XXXX з коментаря до платежу.
+ * Витягти код PAI-XXXX з коментаря або опису до платежу.
+ * Monobank може записати код як у comment, так і в description.
  */
-function extractPaymentCode(comment: string | undefined): string | null {
-  if (!comment) return null;
-  const match = comment.match(/PAI-(\d{4,})/i);
-  return match ? `PAI-${match[1]}` : null;
+function extractPaymentCode(comment: string | undefined, description: string | undefined): string | null {
+  for (const text of [comment, description]) {
+    if (!text) continue;
+    const match = text.match(/PAI-(\d{4,})/i);
+    if (match) return `PAI-${match[1]}`;
+  }
+  return null;
 }
 
 type PendingDeposit = {
@@ -100,7 +104,7 @@ export async function runMonoCheck(): Promise<{ matched: number; checked: number
     // Пропускаємо витрати (amount < 0)
     if (tx.amount <= 0) continue;
 
-    const code = extractPaymentCode(tx.comment);
+    const code = extractPaymentCode(tx.comment, tx.description);
     if (!code) continue;
 
     const deposit = codeMap.get(code.toUpperCase());
