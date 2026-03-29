@@ -3,11 +3,5 @@
   "buildCommand": "npm run build:web",
   "outputDirectory": "apps/web/.next",
   "installCommand": "npm install",
-  "devCommand": "npm run dev:web",
-  "crons": [
-    {
-      "path": "/api/pai/mono-check",
-      "schedule": "0 * * * *"
-    }
-  ]
+  "devCommand": "npm run dev:web"
 }
