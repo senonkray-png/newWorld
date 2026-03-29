@@ -48,10 +48,13 @@ function normalizeContent(locale: Locale, value: unknown): HomeContent {
     heroTitle: cleanText(input.heroTitle, fallback.heroTitle),
     heroText: cleanText(input.heroText, fallback.heroText),
     heroImage: cleanText(input.heroImage, fallback.heroImage),
+    heroTitleFontSize: typeof input.heroTitleFontSize === 'number' ? input.heroTitleFontSize : undefined,
+    heroTextFontSize: typeof input.heroTextFontSize === 'number' ? input.heroTextFontSize : undefined,
     heroButtons: Array.isArray(input.heroButtons)
       ? input.heroButtons.map((btn) => cleanButton(btn, { label: 'Button', href: '#' }))
       : fallback.heroButtons,
     primaryAction: cleanText(input.primaryAction, fallback.primaryAction),
+    primaryActionHref: typeof input.primaryActionHref === 'string' && input.primaryActionHref.trim() ? input.primaryActionHref : undefined,
     secondaryAction: cleanText(input.secondaryAction, fallback.secondaryAction),
     featureTitle: cleanText(input.featureTitle, fallback.featureTitle),
     featureItems: Array.isArray(input.featureItems)

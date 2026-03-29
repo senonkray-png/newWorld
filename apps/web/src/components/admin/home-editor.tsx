@@ -248,7 +248,15 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
         <div className="nm-admin-card">
           <h3>Hero блок</h3>
           <InputField label="Hero заголовок" value={content.heroTitle} onChange={(value) => setContent((prev) => ({ ...prev, heroTitle: value }))} />
+          <label className="nm-admin-field">
+            <span>Размер шрифта заголовка: {content.heroTitleFontSize ?? 32}px</span>
+            <input type="range" min={18} max={72} value={content.heroTitleFontSize ?? 32} onChange={(e) => setContent((prev) => ({ ...prev, heroTitleFontSize: Number(e.target.value) }))} />
+          </label>
           <TextareaField label="Hero текст" value={content.heroText} onChange={(value) => setContent((prev) => ({ ...prev, heroText: value }))} />
+          <label className="nm-admin-field">
+            <span>Размер шрифта описания: {content.heroTextFontSize ?? 16}px</span>
+            <input type="range" min={12} max={36} value={content.heroTextFontSize ?? 16} onChange={(e) => setContent((prev) => ({ ...prev, heroTextFontSize: Number(e.target.value) }))} />
+          </label>
           <ImageInputField
             label="Hero зображення"
             value={content.heroImage}
@@ -256,7 +264,24 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
             onFileSelect={(file) => handleImageUploadGeneric(file, (url) => setContent((prev) => ({ ...prev, heroImage: url })))}
             isLoading={uploadingImage !== null}
           />
-          <InputField label="Кнопка «Стать партнером»" value={content.primaryAction} onChange={(value) => setContent((prev) => ({ ...prev, primaryAction: value }))} />
+          <InputField label="Текст кнопки" value={content.primaryAction} onChange={(value) => setContent((prev) => ({ ...prev, primaryAction: value }))} />
+          <label className="nm-admin-field">
+            <span>Страница кнопки</span>
+            <select value={content.primaryActionHref ?? '/register'} onChange={(e) => setContent((prev) => ({ ...prev, primaryActionHref: e.target.value }))}>
+              <option value="/register">Регистрация</option>
+              <option value="/login">Вход</option>
+              <option value="/products">Маркетплейс</option>
+              <option value="/services">Сервисы</option>
+              <option value="/partners">Партнёры</option>
+              <option value="/profile">Профиль</option>
+              <option value="/messages">Сообщения</option>
+              <option value="/users">Пользователи</option>
+              <option value="/admin">Админ-панель</option>
+            </select>
+          </label>
+          <button type="button" className="nm-btn nm-btn-secondary" style={{ marginTop: '0.5rem', alignSelf: 'flex-start' }} onClick={() => setContent((prev) => ({ ...prev, heroTitleFontSize: undefined, heroTextFontSize: undefined }))}>
+            Сбросить размеры Hero
+          </button>
         </div>
 
         <div className="nm-admin-card">
@@ -292,6 +317,9 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
                   <input type="checkbox" checked={item.isNewPage ?? false} onChange={(e) => updateFeature(index, 'isNewPage', e.target.checked)} />
                 </label>
               )}
+              <button type="button" className="nm-btn nm-btn-secondary" style={{ marginTop: '0.25rem', alignSelf: 'flex-start' }} onClick={() => { updateFeature(index, 'headerFontSize', undefined as unknown as number); updateFeature(index, 'descFontSize', undefined as unknown as number); }}>
+                Сбросить размеры
+              </button>
             </div>
           ))}
         </div>
@@ -329,6 +357,9 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
                   <input type="checkbox" checked={item.isNewPage ?? false} onChange={(e) => updateProcess(index, 'isNewPage', e.target.checked)} />
                 </label>
               )}
+              <button type="button" className="nm-btn nm-btn-secondary" style={{ marginTop: '0.25rem', alignSelf: 'flex-start' }} onClick={() => { updateProcess(index, 'headerFontSize', undefined as unknown as number); updateProcess(index, 'descFontSize', undefined as unknown as number); }}>
+                Сбросить размеры
+              </button>
             </div>
           ))}
         </div>

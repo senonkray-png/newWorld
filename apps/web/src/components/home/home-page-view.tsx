@@ -87,10 +87,10 @@ export function HomePageView({ locale, content }: HomePageViewProps) {
         style={{ backgroundImage: `linear-gradient(90deg, rgba(17, 26, 30, 0.82), rgba(17, 26, 30, 0.48)), url(${content.heroImage})` }}
       >
         <div className="nm-hero-body">
-          <h1>{content.heroTitle}</h1>
-          <p>{content.heroText}</p>
+          <h1 style={content.heroTitleFontSize ? { fontSize: `${content.heroTitleFontSize}px` } : undefined}>{content.heroTitle}</h1>
+          <p style={content.heroTextFontSize ? { fontSize: `${content.heroTextFontSize}px` } : undefined}>{content.heroText}</p>
           <div className="nm-actions">
-            <Link href={`/${locale}/register`} className="nm-btn nm-btn-primary">
+            <Link href={`/${locale}${content.primaryActionHref ?? '/register'}`} className="nm-btn nm-btn-primary">
               {content.primaryAction}
             </Link>
           </div>

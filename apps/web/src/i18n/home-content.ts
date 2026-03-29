@@ -31,8 +31,11 @@ export type HomeContent = {
   heroTitle: string;
   heroText: string;
   heroImage: string;
+  heroTitleFontSize?: number;
+  heroTextFontSize?: number;
   heroButtons: HomeButton[];
   primaryAction: string;
+  primaryActionHref?: string;
   secondaryAction: string;
   featureTitle: string;
   featureItems: HomeFeature[];
