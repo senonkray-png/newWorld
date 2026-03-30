@@ -47,9 +47,9 @@ export default async function InfoPage({
   const headerStyle = card.headerFontSize ? { fontSize: `${card.headerFontSize}px` } : undefined;
 
   return (
-    <main className="nm-page" style={{ padding: '2rem 1rem', maxWidth: '800px', margin: '0 auto' }}>
+    <main className="nm-page" style={{ maxWidth: '800px', margin: '0 auto' }}>
       <Link href={`/${locale}`} className="nm-btn nm-btn-secondary" style={{ marginBottom: '1.5rem', display: 'inline-block' }}>
-        ← {locale === 'en' ? 'Back' : locale === 'uk' ? 'Назад' : 'Назад'}
+        ← {locale === 'en' ? 'Back' : 'Назад'}
       </Link>
       <h1 style={headerStyle}>{card.title}</h1>
       <div dangerouslySetInnerHTML={{ __html: card.extraContent! }} />

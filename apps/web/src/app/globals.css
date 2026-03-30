@@ -36,9 +36,9 @@ a {
 }
 
 .nm-page {
-  width: min(1220px, calc(100% - 28px));
+  width: min(1220px, calc(100% - clamp(16px, 2vw, 28px)));
   margin: 0 auto;
-  padding: 116px 0 72px;
+  padding: clamp(88px, 12vw, 116px) 0 clamp(36px, 6vw, 72px);
 }
 
 .nm-site-header-wrap {
@@ -96,9 +96,9 @@ a {
 }
 
 .nm-hero {
-  border-radius: 28px;
-  min-height: 560px;
-  padding: 20px;
+  border-radius: clamp(16px, 3vw, 28px);
+  min-height: clamp(340px, 56vw, 560px);
+  padding: clamp(14px, 2vw, 20px);
   display: grid;
   align-content: space-between;
   background-position: center;
@@ -414,7 +414,7 @@ a {
 }
 
 .nm-hero-body {
-  max-width: 760px;
+  max-width: min(760px, 100%);
   color: #f6fbff;
 }
 
@@ -435,20 +435,21 @@ a {
 
 .nm-actions {
   display: flex;
-  gap: 12px;
+  gap: clamp(8px, 1.5vw, 12px);
   flex-wrap: wrap;
-  margin-top: 26px;
+  margin-top: clamp(16px, 3vw, 26px);
 }
 
 .nm-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
-  padding: 0 18px;
+  min-height: clamp(38px, 5vw, 46px);
+  padding: 0 clamp(12px, 2vw, 18px);
   border-radius: 12px;
   border: 1px solid transparent;
   font-weight: 600;
+  font-size: clamp(0.82rem, 1.8vw, 1rem);
   cursor: pointer;
 }
 
@@ -470,7 +471,7 @@ a {
 .nm-process,
 .nm-story-wrap,
 .nm-team {
-  margin-top: 26px;
+  margin-top: clamp(18px, 3vw, 26px);
 }
 
 .nm-section-title {
@@ -480,7 +481,7 @@ a {
 
 .nm-grid {
   display: grid;
-  gap: 14px;
+  gap: clamp(10px, 1.5vw, 14px);
 }
 
 .nm-grid-4 {
@@ -495,8 +496,8 @@ a {
 .nm-process-card {
   background: var(--nm-card);
   border: 1px solid var(--nm-line);
-  border-radius: 16px;
-  padding: 18px;
+  border-radius: clamp(12px, 2vw, 16px);
+  padding: clamp(12px, 2vw, 18px);
   box-shadow: 0 8px 24px rgba(17, 26, 30, 0.06);
 }
 
@@ -518,8 +519,8 @@ a {
 }
 
 .nm-process {
-  padding: 24px;
-  border-radius: 24px;
+  padding: clamp(14px, 2.5vw, 24px);
+  border-radius: clamp(14px, 3vw, 24px);
   background: linear-gradient(180deg, #f4f7fa 0%, #ecf0f3 100%);
   border: 1px solid rgba(32, 45, 52, 0.08);
 }
@@ -539,7 +540,7 @@ a {
 
 .nm-story-image {
   width: 100%;
-  height: 360px;
+  height: clamp(200px, 30vw, 360px);
   object-fit: cover;
 }
 
@@ -564,19 +565,19 @@ a {
 }
 
 .nm-team-content {
-  padding: 24px;
+  padding: clamp(14px, 2.5vw, 24px);
   display: grid;
   align-content: center;
-  gap: 18px;
+  gap: clamp(12px, 2vw, 18px);
 }
 
 .nm-admin-layout {
-  width: min(1220px, calc(100% - 28px));
+  width: min(1220px, calc(100% - clamp(16px, 2vw, 28px)));
   margin: 0 auto;
-  padding: 116px 0 64px;
+  padding: clamp(88px, 12vw, 116px) 0 clamp(36px, 5vw, 64px);
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: 16px;
+  gap: clamp(10px, 1.5vw, 16px);
 }
 
 .nm-admin-sidebar,
@@ -790,17 +791,17 @@ a {
 }
 
 .nm-register-page {
-  width: min(1220px, calc(100% - 28px));
+  width: min(1220px, calc(100% - clamp(16px, 2vw, 28px)));
   margin: 0 auto;
-  padding: 116px 0 64px;
+  padding: clamp(88px, 12vw, 116px) 0 clamp(36px, 5vw, 64px);
   display: grid;
-  gap: 16px;
+  gap: clamp(10px, 1.5vw, 16px);
 }
 
 .nm-cabinet-shell {
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: 14px;
+  gap: clamp(10px, 1.5vw, 14px);
 }
 
 .nm-cabinet-nav {
@@ -896,8 +897,8 @@ a {
 .nm-register-card {
   background: #ffffff;
   border: 1px solid var(--nm-line);
-  border-radius: 16px;
-  padding: 18px;
+  border-radius: clamp(12px, 2vw, 16px);
+  padding: clamp(12px, 2vw, 18px);
 }
 
 .nm-register-card h1,
@@ -1002,8 +1003,8 @@ a {
 
 .nm-market-grid {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(8px, 1.5vw, 12px);
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
 }
 
 .nm-market-card {
@@ -1091,17 +1092,17 @@ a {
   z-index: 400;
   display: grid;
   place-items: center;
-  padding: 16px;
+  padding: clamp(8px, 2vw, 16px);
 }
 
 .nm-modal {
-  width: min(640px, 100%);
+  width: min(640px, calc(100% - 16px));
   max-height: calc(100vh - 32px);
   overflow: auto;
   background: #ffffff;
   border: 1px solid var(--nm-line);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: clamp(12px, 2vw, 16px);
+  padding: clamp(12px, 2vw, 16px);
   box-shadow: var(--nm-shadow);
 }
 
@@ -1280,38 +1281,88 @@ a {
   .nm-admin-sidebar {
     position: static;
   }
+
+  .nm-cabinet-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-cabinet-nav {
+    position: static;
+  }
+
+  .nm-profile-view-grid,
+  .nm-profile-edit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nm-story-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-team {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-team-image {
+    min-height: 240px;
+    max-height: 360px;
+  }
+
+  .nm-register-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-partner-list {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-catalog-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-admin-button-item,
+  .nm-admin-new-button {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 760px) {
   .nm-page,
+  .nm-register-page,
   .nm-admin-layout {
-    width: min(100% - 16px, 1220px);
-    padding-top: 98px;
+    width: calc(100% - 16px);
+    padding-top: 82px;
   }
 
   .nm-site-header-wrap {
     top: 6px;
-    padding: 0 8px;
+    padding: 0 6px;
   }
 
   .nm-site-header {
-    min-height: 58px;
-    padding: 8px 10px;
+    min-height: 54px;
+    padding: 6px 10px;
     gap: 6px;
+    border-radius: 14px;
+  }
+
+  .nm-site-logo {
+    width: 42px;
+    height: 42px;
   }
 
   .nm-site-title {
-    font-size: 0.8rem;
-    letter-spacing: 0.06em;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
   }
 
   .nm-site-controls {
-    gap: 6px;
+    gap: 5px;
     min-width: 0;
   }
 
   .nm-auth-user-inline {
-    gap: 5px;
+    gap: 4px;
     min-width: 0;
   }
 
@@ -1322,13 +1373,14 @@ a {
   }
 
   .nm-admin-link-btn {
-    padding: 0 9px;
-    font-size: 0.74rem;
+    padding: 0 8px;
+    font-size: 0.72rem;
   }
 
   .nm-lang-trigger,
   .nm-user-trigger {
-    padding: 8px 9px;
+    padding: 7px 9px;
+    font-size: 0.78rem;
   }
 
   .nm-label-desktop {
@@ -1340,8 +1392,16 @@ a {
   }
 
   .nm-hero {
-    min-height: 440px;
-    padding: 16px;
+    min-height: 360px;
+    border-radius: 16px;
+  }
+
+  .nm-hero-body h1 {
+    font-size: clamp(1.6rem, 6vw, 2.8rem);
+  }
+
+  .nm-hero-body p {
+    font-size: clamp(0.88rem, 2.2vw, 1.1rem);
   }
 
   .nm-top-header {
@@ -1356,35 +1416,103 @@ a {
     justify-content: space-between;
   }
 
-  .nm-register-grid,
-  .nm-partner-list {
-    grid-template-columns: 1fr;
-    width: 100%;
-    justify-content: flex-start;
-  }
-
   .nm-grid-4,
-  .nm-grid-3,
-  .nm-cabinet-shell,
-  .nm-market-grid,
-  .nm-messages-layout,
-  .nm-profile-view-grid,
-  .nm-profile-edit-grid,
-  .nm-story-wrap,
-  .nm-team {
+  .nm-grid-3 {
     grid-template-columns: 1fr;
   }
 
-  .nm-cabinet-nav {
-    position: static;
+  .nm-messages-layout {
+    grid-template-columns: 1fr;
   }
 
-  .nm-story-image {
-    height: 280px;
+  .nm-profile-view-grid,
+  .nm-profile-edit-grid {
+    grid-template-columns: 1fr;
   }
 
-  .nm-team-content {
-    padding: 18px;
+  .nm-section-title {
+    font-size: clamp(1.15rem, 3.5vw, 1.6rem);
+  }
+
+  .nm-panel h3,
+  .nm-process-card h3,
+  .nm-story-body h3,
+  .nm-team-content h3 {
+    font-size: 1rem;
+  }
+
+  .nm-register-card {
+    padding: 14px;
+  }
+
+  .nm-admin-card {
+    padding: 12px;
+  }
+
+  .nm-admin-content {
+    padding: 14px;
+  }
+
+  .nm-admin-actions {
+    gap: 8px;
+  }
+
+  .nm-cabinet-nav-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    clip-path: none;
+    border-radius: 8px;
+  }
+
+  .nm-admin-button-item,
+  .nm-admin-new-button {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-role-table {
+    font-size: 0.82rem;
+  }
+
+  .nm-role-table th,
+  .nm-role-table td {
+    padding: 8px 10px;
+  }
+
+  .nm-role-cell-name {
+    min-width: 110px;
+  }
+
+  .nm-role-cell-email {
+    min-width: 120px;
+  }
+
+  .nm-role-select {
+    min-width: 130px;
+  }
+
+  .nm-public-profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .nm-burger-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .nm-notification-dropdown {
+    width: min(340px, calc(100vw - 32px));
+    max-height: 300px;
+  }
+
+  .nm-dropdown-menu {
+    min-width: 150px;
+  }
+
+  .nm-modal-content {
+    padding: 1.25rem;
+    max-width: calc(100vw - 32px);
   }
 }
 
@@ -1400,6 +1528,237 @@ a {
 
   .nm-site-brand {
     gap: 6px;
+  }
+
+  .nm-page,
+  .nm-register-page,
+  .nm-admin-layout {
+    width: calc(100% - 12px);
+    padding-top: 74px;
+  }
+
+  .nm-hero {
+    min-height: 300px;
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  .nm-hero-body h1 {
+    font-size: clamp(1.3rem, 5.5vw, 2rem);
+  }
+
+  .nm-hero-body p {
+    font-size: 0.88rem;
+    max-width: 100%;
+  }
+
+  .nm-btn {
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 0.82rem;
+    border-radius: 10px;
+  }
+
+  .nm-register-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .nm-register-card h1 {
+    font-size: 1.2rem;
+  }
+
+  .nm-register-card h2 {
+    font-size: 1.1rem;
+  }
+
+  .nm-admin-card {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .nm-admin-field input,
+  .nm-admin-field textarea,
+  .nm-admin-field select {
+    padding: 8px 10px;
+    font-size: 0.88rem;
+  }
+
+  .nm-admin-field span {
+    font-size: 0.82rem;
+  }
+
+  .nm-register-auth {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .nm-partner-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .nm-partner-card h3 {
+    font-size: 0.95rem;
+  }
+
+  .nm-profile-avatar {
+    width: 88px;
+    height: 88px;
+  }
+
+  .nm-avatar-lg {
+    width: 72px !important;
+    height: 72px !important;
+    font-size: 1.6rem !important;
+  }
+
+  .nm-user-list-avatar,
+  .nm-user-list-avatar-placeholder {
+    width: 44px;
+    height: 44px;
+  }
+
+  .nm-user-list-item {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .nm-user-list-name {
+    font-size: 0.92rem;
+  }
+
+  .nm-market-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .nm-modal {
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  .nm-modal h3 {
+    font-size: 1rem;
+  }
+
+  .nm-service-switch {
+    border-radius: 14px;
+  }
+
+  .nm-service-switch-btn {
+    padding: 8px 10px;
+    font-size: 0.88rem;
+  }
+
+  .nm-cabinet-nav {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .nm-cabinet-nav h2 {
+    font-size: 1.05rem;
+  }
+
+  .nm-cabinet-list-item {
+    padding: 9px;
+    border-radius: 10px;
+  }
+
+  .nm-admin-section-title {
+    font-size: 1rem;
+  }
+
+  .nm-admin-tabs-wrap {
+    padding: 0 10px;
+  }
+
+  .nm-admin-tab {
+    padding: 8px 12px;
+    font-size: 0.82rem;
+  }
+
+  .nm-admin-tabs {
+    gap: 2px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nm-role-table-wrap {
+    margin: 0 -10px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .nm-site-header {
+    min-height: 48px;
+    padding: 5px 6px;
+    border-radius: 12px;
+  }
+
+  .nm-site-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nm-lang-trigger,
+  .nm-user-trigger {
+    padding: 6px 7px;
+    font-size: 0.74rem;
+  }
+
+  .nm-auth-link-btn {
+    min-height: 30px;
+    padding: 0 8px;
+    font-size: 0.72rem;
+  }
+
+  .nm-burger-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .nm-hero {
+    min-height: 260px;
+    padding: 10px;
+  }
+
+  .nm-hero-body h1 {
+    font-size: 1.2rem;
+    line-height: 1.1;
+  }
+
+  .nm-hero-body p {
+    font-size: 0.82rem;
+    margin-top: 10px;
+  }
+
+  .nm-page,
+  .nm-register-page,
+  .nm-admin-layout {
+    width: calc(100% - 8px);
+    padding-top: 66px;
+  }
+
+  .nm-register-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .nm-register-card h1 {
+    font-size: 1.08rem;
+  }
+
+  .nm-btn {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 0.78rem;
+    border-radius: 8px;
   }
 }
 
@@ -1570,7 +1929,7 @@ a {
   display: grid;
   grid-template-columns: 360px 1fr;
   min-height: 72vh;
-  border-radius: 20px;
+  border-radius: clamp(12px, 2vw, 20px);
   overflow: hidden;
   background: linear-gradient(130deg, #f6f7fb 0%, #ffffff 100%);
   border: 1px solid #d6dce6;
@@ -2011,16 +2370,16 @@ a {
 
   .nm-chat-shell {
     grid-template-columns: 1fr;
-    min-height: 78vh;
+    min-height: 70vh;
   }
 
   .nm-chat-sidebar {
     max-height: none;
-    min-height: 78vh;
+    min-height: auto;
   }
 
   .nm-chat-thread {
-    min-height: 78vh;
+    min-height: 70vh;
   }
 
   .nm-chat-pane-hidden {
@@ -2050,12 +2409,12 @@ a {
   }
 
   .nm-chat-dialog-avatar {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
   }
 
   .nm-chat-dialog-top strong {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
 
   .nm-reason-grid {
@@ -2072,6 +2431,19 @@ a {
 
   .nm-chat-input {
     min-height: 56px;
+  }
+
+  .nm-chat-sidebar-head h1 {
+    font-size: 1.05rem;
+  }
+
+  .nm-chat-sidebar-head p {
+    font-size: 0.8rem;
+  }
+
+  .nm-chat-compose-actions {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }
 
@@ -2092,6 +2464,60 @@ a {
 
   .nm-chat-send-btn {
     width: 100%;
+  }
+
+  .nm-chat-shell {
+    border-radius: 14px;
+  }
+
+  .nm-chat-sidebar-head {
+    padding: 14px 12px 10px;
+  }
+
+  .nm-chat-search-wrap {
+    padding: 0 12px 10px;
+  }
+
+  .nm-chat-scroll {
+    padding: 0 8px 10px;
+  }
+
+  .nm-chat-contact {
+    padding: 8px;
+    border-radius: 10px;
+  }
+
+  .nm-chat-dialog-item {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .nm-chat-dialog-avatar,
+  .nm-chat-dialog-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    font-size: 0.78rem;
+  }
+
+  .nm-bubble {
+    max-width: 90%;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+
+  .nm-chat-input {
+    min-height: 48px;
+    font-size: 0.9rem;
+  }
+
+  .nm-chat-back-btn {
+    padding: 5px 8px;
+    font-size: 0.76rem;
+  }
+
+  .nm-ref-tag {
+    padding: 5px 8px;
+    font-size: 0.78rem;
   }
 }
 
@@ -2268,13 +2694,13 @@ a {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: clamp(0.5rem, 2vw, 1rem);
 }
 .nm-modal-content {
   background: var(--nm-card, #fff);
-  border-radius: 16px;
-  padding: 2rem;
-  max-width: 640px;
+  border-radius: clamp(12px, 2vw, 16px);
+  padding: clamp(1rem, 3vw, 2rem);
+  max-width: min(640px, calc(100vw - 24px));
   width: 100%;
   max-height: 80vh;
   overflow-y: auto;
