@@ -973,6 +973,12 @@ a {
   font-weight: 600;
 }
 
+.nm-admin-card-section {
+  max-width: 900px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .nm-profile-view-grid,
 .nm-profile-edit-grid {
   display: grid;
@@ -1445,16 +1451,56 @@ a {
     padding: 14px;
   }
 
+  .nm-admin-layout {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .nm-admin-sidebar {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+
+  .nm-admin-sidebar h1 {
+    font-size: 1rem;
+    margin-right: auto;
+  }
+
+  .nm-admin-sidebar .nm-admin-tabs {
+    display: none;
+  }
+
   .nm-admin-card {
     padding: 12px;
   }
 
   .nm-admin-content {
-    padding: 14px;
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .nm-admin-head h2 {
+    font-size: 1rem;
+  }
+
+  .nm-admin-head p {
+    font-size: 0.82rem;
   }
 
   .nm-admin-actions {
     gap: 8px;
+    flex-direction: column;
+  }
+
+  .nm-admin-actions .nm-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
   .nm-cabinet-nav-btn {
@@ -1469,25 +1515,84 @@ a {
     grid-template-columns: 1fr;
   }
 
+  /* Role table — switch to card layout on mobile */
   .nm-role-table {
     font-size: 0.82rem;
   }
 
-  .nm-role-table th,
-  .nm-role-table td {
-    padding: 8px 10px;
+  .nm-role-table thead {
+    display: none;
+  }
+
+  .nm-role-table tbody,
+  .nm-role-table tbody tr,
+  .nm-role-table tbody td {
+    display: block;
+  }
+
+  .nm-role-table tbody tr {
+    padding: 10px;
+    border-bottom: 1px solid var(--nm-line);
+    margin-bottom: 6px;
+  }
+
+  .nm-role-table tbody td {
+    padding: 4px 0;
+    border-bottom: none;
   }
 
   .nm-role-cell-name {
-    min-width: 110px;
+    min-width: unset;
+    font-size: 0.92rem;
   }
 
   .nm-role-cell-email {
-    min-width: 120px;
+    min-width: unset;
+    font-size: 0.8rem;
   }
 
   .nm-role-select {
-    min-width: 130px;
+    min-width: unset;
+    width: 100%;
+  }
+
+  .nm-role-cell-action {
+    min-width: unset;
+    margin-top: 6px;
+  }
+
+  .nm-role-save-btn {
+    width: 100%;
+  }
+
+  .nm-admin-tabs-wrap {
+    padding: 0 8px;
+  }
+
+  .nm-admin-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .nm-admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nm-admin-tab {
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .nm-register-card {
+    padding: 14px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .nm-public-profile-header {
@@ -1671,12 +1776,12 @@ a {
   }
 
   .nm-admin-tabs-wrap {
-    padding: 0 10px;
+    padding: 0 6px;
   }
 
   .nm-admin-tab {
-    padding: 8px 12px;
-    font-size: 0.82rem;
+    padding: 7px 10px;
+    font-size: 0.78rem;
   }
 
   .nm-admin-tabs {
@@ -1684,6 +1789,41 @@ a {
     overflow-x: auto;
     flex-wrap: nowrap;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .nm-admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nm-admin-sidebar {
+    padding: 8px 10px;
+    border-radius: 10px;
+  }
+
+  .nm-admin-sidebar h1 {
+    font-size: 0.92rem;
+  }
+
+  .nm-admin-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .nm-admin-content {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .nm-admin-field span {
+    font-size: 0.8rem;
+  }
+
+  .nm-admin-field input,
+  .nm-admin-field textarea,
+  .nm-admin-field select {
+    padding: 8px 9px;
+    font-size: 0.85rem;
   }
 
   .nm-role-table-wrap {
@@ -1691,6 +1831,16 @@ a {
     border-radius: 0;
     border-left: none;
     border-right: none;
+  }
+
+  .nm-role-cell-name {
+    gap: 6px;
+  }
+
+  .nm-role-avatar-placeholder {
+    width: 26px;
+    height: 26px;
+    font-size: 0.72rem;
   }
 }
 
@@ -1759,6 +1909,33 @@ a {
     padding: 0 10px;
     font-size: 0.78rem;
     border-radius: 8px;
+  }
+
+  .nm-admin-sidebar {
+    padding: 6px 8px;
+  }
+
+  .nm-admin-sidebar h1 {
+    font-size: 0.86rem;
+  }
+
+  .nm-admin-card {
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .nm-admin-content {
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .nm-admin-group h4 {
+    font-size: 0.88rem;
+  }
+
+  .nm-admin-tab {
+    padding: 6px 8px;
+    font-size: 0.74rem;
   }
 }
 

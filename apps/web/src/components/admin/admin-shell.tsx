@@ -167,13 +167,13 @@ export function AdminShell({ locale }: { locale: Locale }) {
       ) : null}
 
       {tab === 'users' ? (
-        <section className="nm-register-card" style={{ maxWidth: '900px' }}>
+        <section className="nm-register-card nm-admin-card-section">
           <UserRoleManager locale={locale} />
         </section>
       ) : null}
 
       {tab === 'deposits' && accessToken ? (
-        <section className="nm-register-card" style={{ maxWidth: '900px' }}>
+        <section className="nm-register-card nm-admin-card-section">
           <ProcessedPaymentsAdmin accessToken={accessToken} locale={locale} />
           <DepositRequestsAdmin accessToken={accessToken} locale={locale} />
           <WithdrawalRequestsAdmin accessToken={accessToken} locale={locale} />
