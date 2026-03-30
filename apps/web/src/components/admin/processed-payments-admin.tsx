@@ -1,6 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import type { Locale } from '@/i18n/config';
+import { getAdminMessages } from '@/i18n/admin-messages';
 
 type ProcessedPayment = {
   id: string;
@@ -16,7 +19,8 @@ type ProcessedPayment = {
   resolved_at: string | null;
 };
 
-export function ProcessedPaymentsAdmin({ accessToken }: { accessToken: string }) {
+export function ProcessedPaymentsAdmin({ accessToken, locale }: { accessToken: string; locale: Locale }) {
+  const t = useMemo(() => getAdminMessages(locale), [locale]);
   const [items, setItems] = useState<ProcessedPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState('');
@@ -105,45 +109,44 @@ export function ProcessedPaymentsAdmin({ accessToken }: { accessToken: string })
   const pending = items.filter((i) => i.status === 'manual_pending');
 
   if (loading) {
-    return <p>Завантаження транзакцій Monobank...</p>;
+    return <p>{t.loadingPayments}</p>;
   }
 
   return (
     <div>
       <h2 style={{ marginTop: '2rem' }}>
-        Черга перевірки Monobank
+        {t.paymentsTitle}
         {pending.length > 0 && (
-          <span style={{ color: '#f59e0b', marginLeft: '0.5rem' }}>({pending.length} очікують)</span>
+          <span style={{ color: '#f59e0b', marginLeft: '0.5rem' }}>({pending.length} {t.pending})</span>
         )}
       </h2>
       <p className="nm-admin-hint" style={{ marginBottom: '0.75rem' }}>
-        Транзакції, де скрипт не зміг розпізнати ID користувача з коментаря. Адмін може вручну
-        вказати user_id і підтвердити нарахування паїв.
+        {t.paymentsHint}
       </p>
 
       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', fontSize: '0.85rem' }}>
         <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
-        Показати всі (включаючи оброблені)
+        {t.showAll}
       </label>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {items.map((item) => (
           <div key={item.id} className="nm-admin-card" style={{ display: 'grid', gap: '0.5rem' }}>
             <div>
-              <strong>Сума: {Number(item.amount_uah).toFixed(2)} грн</strong>
-              {item.amount_pai > 0 && <span> → {Number(item.amount_pai).toFixed(2)} паїв</span>}
+              <strong>{t.amount}: {Number(item.amount_uah).toFixed(2)} {t.uah}</strong>
+              {item.amount_pai > 0 && <span> → {Number(item.amount_pai).toFixed(2)} {t.shares}</span>}
               <span style={{ opacity: 0.7, marginLeft: '0.5rem', fontSize: '0.85rem' }}>
                 {formatDate(item.mono_time)}
               </span>
             </div>
             <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>
-              Коментар з банку: <em>{item.comment_raw || '(пусто)'}</em>
+              {t.bankComment}: <em>{item.comment_raw || t.empty}</em>
             </div>
             <div>
-              Статус: <strong style={{
+              {t.status}: <strong style={{
                 color: item.status === 'success' ? '#22c55e' : item.status === 'manual_pending' ? '#f59e0b' : '#ef4444',
               }}>{item.status}</strong>
-              {item.user_id && <span style={{ marginLeft: '0.5rem', fontSize: '0.85rem' }}>User: {item.user_id}</span>}
+              {item.user_id && <span style={{ marginLeft: '0.5rem', fontSize: '0.85rem' }}>{t.user}: {item.user_id}</span>}
               {item.admin_comment && <span style={{ marginLeft: '0.5rem', fontSize: '0.85rem' }}> — {item.admin_comment}</span>}
             </div>
             <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
@@ -157,7 +160,7 @@ export function ProcessedPaymentsAdmin({ accessToken }: { accessToken: string })
                   disabled={busyId === item.id}
                   onClick={() => openConfirm(item.id)}
                 >
-                  Підтвердити вручну
+                  {t.confirmManual}
                 </button>
                 <button
                   type="button"
@@ -165,7 +168,7 @@ export function ProcessedPaymentsAdmin({ accessToken }: { accessToken: string })
                   disabled={busyId === item.id}
                   onClick={() => openReject(item.id)}
                 >
-                  Відхилити
+                  {t.reject}
                 </button>
               </div>
             )}
@@ -173,22 +176,22 @@ export function ProcessedPaymentsAdmin({ accessToken }: { accessToken: string })
         ))}
       </div>
 
-      {items.length === 0 && <p className="nm-admin-hint">Немає транзакцій для перевірки.</p>}
+      {items.length === 0 && <p className="nm-admin-hint">{t.noPayments}</p>}
 
       {/* Confirm modal */}
       {confirmId && (
         <div className="nm-modal-backdrop" onClick={() => setConfirmId('')}>
           <div className="nm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Підтвердити вручну</h3>
+            <h3>{t.confirmManual}</h3>
             <p className="nm-admin-hint">
-              Вкажіть UUID або member_id користувача, якому нарахувати паї.
+              {t.enterUserId}
             </p>
             <label className="nm-admin-field">
-              <span>User ID або Member ID</span>
+              <span>{t.userIdLabel}</span>
               <input
                 value={confirmUserId}
                 onChange={(e) => setConfirmUserId(e.target.value)}
-                placeholder="UUID або числовий ID"
+                placeholder={t.userIdPlaceholder}
                 autoFocus
               />
             </label>
@@ -199,10 +202,10 @@ export function ProcessedPaymentsAdmin({ accessToken }: { accessToken: string })
                 onClick={() => void submitConfirm()}
                 disabled={!confirmUserId.trim() || Boolean(busyId)}
               >
-                Підтвердити та нарахувати паї
+                {t.confirmAndCredit}
               </button>
               <button type="button" className="nm-btn nm-btn-secondary" onClick={() => setConfirmId('')}>
-                Закрити
+                {t.close}
               </button>
             </div>
           </div>
@@ -213,9 +216,9 @@ export function ProcessedPaymentsAdmin({ accessToken }: { accessToken: string })
       {rejectId && (
         <div className="nm-modal-backdrop" onClick={() => setRejectId('')}>
           <div className="nm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Причина відхилення</h3>
+            <h3>{t.rejectReason}</h3>
             <label className="nm-admin-field">
-              <span>Коментар</span>
+              <span>{t.rejectComment}</span>
               <textarea rows={3} value={rejectComment} onChange={(e) => setRejectComment(e.target.value)} />
             </label>
             <div className="nm-admin-actions">
@@ -225,10 +228,10 @@ export function ProcessedPaymentsAdmin({ accessToken }: { accessToken: string })
                 onClick={() => void submitReject()}
                 disabled={!rejectComment.trim() || Boolean(busyId)}
               >
-                Відхилити
+                {t.rejectPayment}
               </button>
               <button type="button" className="nm-btn nm-btn-secondary" onClick={() => setRejectId('')}>
-                Закрити
+                {t.close}
               </button>
             </div>
           </div>

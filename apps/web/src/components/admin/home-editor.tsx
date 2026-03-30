@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import type { Locale } from '@/i18n/config';
+import { locales } from '@/i18n/config';
 import {
   defaultHomeContent,
   type HomeContent,
 } from '@/i18n/home-content';
+import { getAdminMessages } from '@/i18n/admin-messages';
 
 type HomeEditorProps = {
   locale: Locale;
@@ -57,12 +59,20 @@ function ImageInputField({
   onChange,
   onFileSelect,
   isLoading,
+  linkLabel,
+  uploadLabel,
+  currentLabel,
+  uploadingLabel,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   onFileSelect: (file: File) => void;
   isLoading?: boolean;
+  linkLabel: string;
+  uploadLabel: string;
+  currentLabel: string;
+  uploadingLabel: string;
 }) {
   const [mode, setMode] = useState<ImageInputMode>('url');
 
@@ -76,7 +86,7 @@ function ImageInputField({
           onClick={() => setMode('url')}
           disabled={isLoading}
         >
-          Посилання
+          {linkLabel}
         </button>
         <button
           type="button"
@@ -84,7 +94,7 @@ function ImageInputField({
           onClick={() => setMode('upload')}
           disabled={isLoading}
         >
-          Завантажити
+          {uploadLabel}
         </button>
       </div>
       {mode === 'url' ? (
@@ -108,13 +118,14 @@ function ImageInputField({
           disabled={isLoading}
         />
       )}
-      {value && <div className="nm-admin-hint">Поточне зображення: {value}</div>}
-      {isLoading && <div className="nm-admin-hint">Завантаження...</div>}
+      {value && <div className="nm-admin-hint">{currentLabel}: {value}</div>}
+      {isLoading && <div className="nm-admin-hint">{uploadingLabel}</div>}
     </div>
   );
 }
 
 export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorProps) {
+  const t = useMemo(() => getAdminMessages(locale), [locale]);
   const fallback = useMemo(() => defaultHomeContent[locale], [locale]);
   const [content, setContent] = useState<HomeContent>(initialContent);
   const [status, setStatus] = useState('');
@@ -135,14 +146,14 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
     setUploadingImage(null);
 
     if (!response.ok) {
-      setStatus('Ошибка загрузки. Повторите попытку.');
+      setStatus(t.uploadError);
       return;
     }
 
     const data = (await response.json()) as { url?: string };
     if (data.url) {
       onSuccess(data.url);
-      setStatus('Изображение загружено');
+      setStatus(t.uploadSuccess);
     }
   };
 
@@ -167,7 +178,7 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
 
   const save = async () => {
     setIsSaving(true);
-    setStatus('Сохранение...');
+    setStatus(t.saving);
 
     const response = await fetch(`/api/home-content/${locale}`, {
       method: 'PUT',
@@ -179,18 +190,74 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
     });
 
     if (!response.ok) {
-      setStatus('Ошибка сохранения. Проверьте данные и повторите.');
+      setStatus(t.saveError);
       setIsSaving(false);
       return;
     }
 
-    setStatus('Сохранено в серверном хранилище.');
+    // Sync visual settings (font sizes, images) to all other locales
+    const otherLocales = locales.filter((l) => l !== locale);
+    for (const otherLocale of otherLocales) {
+      try {
+        const r = await fetch(`/api/home-content/${otherLocale}`);
+        if (!r.ok) continue;
+        const payload = (await r.json()) as { content?: HomeContent };
+        const other = payload.content;
+        if (!other) continue;
+
+        const synced: HomeContent = {
+          ...other,
+          heroTitleFontSize: content.heroTitleFontSize,
+          heroTextFontSize: content.heroTextFontSize,
+          heroImage: content.heroImage,
+          primaryActionHref: content.primaryActionHref,
+          storyLeft: { ...other.storyLeft, image: content.storyLeft.image },
+          storyRight: { ...other.storyRight, image: content.storyRight.image },
+          teamSection: { ...other.teamSection, image: content.teamSection.image },
+          featureItems: other.featureItems.map((item, i) => {
+            const src = content.featureItems[i];
+            if (!src) return item;
+            return {
+              ...item,
+              icon: src.icon,
+              headerFontSize: src.headerFontSize,
+              descFontSize: src.descFontSize,
+              isNewPage: src.isNewPage,
+            };
+          }),
+          processItems: other.processItems.map((item, i) => {
+            const src = content.processItems[i];
+            if (!src) return item;
+            return {
+              ...item,
+              icon: src.icon,
+              headerFontSize: src.headerFontSize,
+              descFontSize: src.descFontSize,
+              isNewPage: src.isNewPage,
+            };
+          }),
+        };
+
+        await fetch(`/api/home-content/${otherLocale}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ content: synced }),
+        });
+      } catch {
+        // Non-critical: sync failed for one locale, continue
+      }
+    }
+
+    setStatus(t.saveSuccess + ' ' + t.syncNote);
     setIsSaving(false);
   };
 
   const reset = async () => {
     setIsSaving(true);
-    setStatus('Сброс...');
+    setStatus(t.resetting);
 
     const response = await fetch(`/api/home-content/${locale}`, {
       method: 'DELETE',
@@ -200,214 +267,329 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
     });
 
     if (!response.ok) {
-      setStatus('Ошибка сброса. Повторите попытку.');
+      setStatus(t.resetError);
       setIsSaving(false);
       return;
     }
 
     const payload = (await response.json()) as { content?: HomeContent };
     setContent(payload.content ?? fallback);
-    setStatus('Сброшено к базовому шаблону и сохранено на сервере.');
+    setStatus(t.resetSuccess);
+    setIsSaving(false);
+  };
+
+  const autoTranslate = async () => {
+    setIsSaving(true);
+    setStatus(t.translating);
+
+    // Collect all translatable text fields
+    const texts = [
+      content.seo.title,
+      content.seo.description,
+      content.heroTitle,
+      content.heroText,
+      content.primaryAction,
+      content.secondaryAction,
+      content.featureTitle,
+      ...content.featureItems.flatMap((f) => [f.title, f.text]),
+      content.processTitle,
+      ...content.processItems.flatMap((p) => [p.title, p.text]),
+      content.storyLeft.title,
+      content.storyLeft.text,
+      content.storyRight.title,
+      content.storyRight.text,
+      content.teamSection.title,
+      content.teamSection.text,
+    ];
+
+    const otherLocales = locales.filter((l) => l !== locale);
+
+    try {
+      for (const targetLocale of otherLocales) {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ texts, from: locale, to: targetLocale }),
+        });
+
+        if (!res.ok) {
+          setStatus(t.translateError);
+          setIsSaving(false);
+          return;
+        }
+
+        const { translations } = (await res.json()) as { translations: string[] };
+        let idx = 0;
+
+        const translated: HomeContent = {
+          ...content,
+          seo: { title: translations[idx++] ?? content.seo.title, description: translations[idx++] ?? content.seo.description },
+          heroTitle: translations[idx++] ?? content.heroTitle,
+          heroText: translations[idx++] ?? content.heroText,
+          primaryAction: translations[idx++] ?? content.primaryAction,
+          secondaryAction: translations[idx++] ?? content.secondaryAction,
+          featureTitle: translations[idx++] ?? content.featureTitle,
+          featureItems: content.featureItems.map((f) => ({
+            ...f,
+            title: translations[idx++] ?? f.title,
+            text: translations[idx++] ?? f.text,
+          })),
+          processTitle: translations[idx++] ?? content.processTitle,
+          processItems: content.processItems.map((p) => ({
+            ...p,
+            title: translations[idx++] ?? p.title,
+            text: translations[idx++] ?? p.text,
+          })),
+          storyLeft: { ...content.storyLeft, title: translations[idx++] ?? content.storyLeft.title, text: translations[idx++] ?? content.storyLeft.text },
+          storyRight: { ...content.storyRight, title: translations[idx++] ?? content.storyRight.title, text: translations[idx++] ?? content.storyRight.text },
+          teamSection: { ...content.teamSection, title: translations[idx++] ?? content.teamSection.title, text: translations[idx++] ?? content.teamSection.text },
+        };
+
+        await fetch(`/api/home-content/${targetLocale}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ content: translated }),
+        });
+      }
+
+      setStatus(t.translateSuccess);
+    } catch {
+      setStatus(t.translateError);
+    }
+
     setIsSaving(false);
   };
 
   return (
     <div className="nm-admin-layout">
       <aside className="nm-admin-sidebar">
-        <h1>Админ-панель</h1>
+        <h1>{t.adminPanel}</h1>
         <div className="nm-admin-tabs">
-          <span className="active">Home</span>
-          <span className="active">SEO</span>
-          <span>Новости (скоро)</span>
+          <span className="active">{t.home}</span>
+          <span className="active">{t.seo}</span>
+          <span>{t.newsSoon}</span>
         </div>
         <Link href={`/${locale}`} className="nm-btn nm-btn-secondary">
-          На главную
+          {t.toMain}
         </Link>
       </aside>
 
       <section className="nm-admin-content">
         <header className="nm-admin-head">
-          <h2>Вкладка Home: редактирование блоков текста и изображений</h2>
-          <p>Можно менять каждый элемент главной страницы: SEO, заголовки, описания, иконки и изображения.</p>
+          <h2>{t.editorTitle}</h2>
+          <p>{t.editorDesc}</p>
         </header>
 
         <div className="nm-admin-card">
-          <h3>SEO</h3>
+          <h3>{t.seo}</h3>
           <InputField
-            label="Title"
+            label={t.seoTitle}
             value={content.seo.title}
             onChange={(value) => setContent((prev) => ({ ...prev, seo: { ...prev.seo, title: value } }))}
           />
           <TextareaField
-            label="Description"
+            label={t.seoDescription}
             value={content.seo.description}
             onChange={(value) => setContent((prev) => ({ ...prev, seo: { ...prev.seo, description: value } }))}
           />
         </div>
 
         <div className="nm-admin-card">
-          <h3>Hero блок</h3>
-          <InputField label="Hero заголовок" value={content.heroTitle} onChange={(value) => setContent((prev) => ({ ...prev, heroTitle: value }))} />
+          <h3>{t.heroBlock}</h3>
+          <InputField label={t.heroHeading} value={content.heroTitle} onChange={(value) => setContent((prev) => ({ ...prev, heroTitle: value }))} />
           <label className="nm-admin-field">
-            <span>Размер шрифта заголовка: {content.heroTitleFontSize ?? 32}px</span>
+            <span>{t.heroTitleFontSize}: {content.heroTitleFontSize ?? 32}px</span>
             <input type="range" min={18} max={72} value={content.heroTitleFontSize ?? 32} onChange={(e) => setContent((prev) => ({ ...prev, heroTitleFontSize: Number(e.target.value) }))} />
           </label>
-          <TextareaField label="Hero текст" value={content.heroText} onChange={(value) => setContent((prev) => ({ ...prev, heroText: value }))} />
+          <TextareaField label={t.heroText} value={content.heroText} onChange={(value) => setContent((prev) => ({ ...prev, heroText: value }))} />
           <label className="nm-admin-field">
-            <span>Размер шрифта описания: {content.heroTextFontSize ?? 16}px</span>
+            <span>{t.heroTextFontSize}: {content.heroTextFontSize ?? 16}px</span>
             <input type="range" min={12} max={36} value={content.heroTextFontSize ?? 16} onChange={(e) => setContent((prev) => ({ ...prev, heroTextFontSize: Number(e.target.value) }))} />
           </label>
           <ImageInputField
-            label="Hero зображення"
+            label={t.heroImage}
             value={content.heroImage}
             onChange={(value) => setContent((prev) => ({ ...prev, heroImage: value }))}
             onFileSelect={(file) => handleImageUploadGeneric(file, (url) => setContent((prev) => ({ ...prev, heroImage: url })))}
             isLoading={uploadingImage !== null}
+            linkLabel={t.linkMode}
+            uploadLabel={t.uploadMode}
+            currentLabel={t.currentImage}
+            uploadingLabel={t.uploading}
           />
-          <InputField label="Текст кнопки" value={content.primaryAction} onChange={(value) => setContent((prev) => ({ ...prev, primaryAction: value }))} />
+          <InputField label={t.buttonText} value={content.primaryAction} onChange={(value) => setContent((prev) => ({ ...prev, primaryAction: value }))} />
           <label className="nm-admin-field">
-            <span>Страница кнопки</span>
+            <span>{t.buttonPage}</span>
             <select value={content.primaryActionHref ?? '/register'} onChange={(e) => setContent((prev) => ({ ...prev, primaryActionHref: e.target.value }))}>
-              <option value="/register">Регистрация</option>
-              <option value="/login">Вход</option>
-              <option value="/products">Маркетплейс</option>
-              <option value="/services">Сервисы</option>
-              <option value="/partners">Партнёры</option>
-              <option value="/profile">Профиль</option>
-              <option value="/messages">Сообщения</option>
-              <option value="/users">Пользователи</option>
-              <option value="/admin">Админ-панель</option>
+              <option value="/register">{t.pageRegister}</option>
+              <option value="/login">{t.pageLogin}</option>
+              <option value="/products">{t.pageProducts}</option>
+              <option value="/services">{t.pageServices}</option>
+              <option value="/partners">{t.pagePartners}</option>
+              <option value="/profile">{t.pageProfile}</option>
+              <option value="/messages">{t.pageMessages}</option>
+              <option value="/users">{t.pageUsers}</option>
+              <option value="/admin">{t.pageAdmin}</option>
             </select>
           </label>
           <button type="button" className="nm-btn nm-btn-secondary" style={{ marginTop: '0.5rem', alignSelf: 'flex-start' }} onClick={() => setContent((prev) => ({ ...prev, heroTitleFontSize: undefined, heroTextFontSize: undefined }))}>
-            Сбросить размеры Hero
+            {t.resetHeroSizes}
           </button>
         </div>
 
         <div className="nm-admin-card">
-          <h3>Секция возможностей</h3>
-          <InputField label="Заголовок секции" value={content.featureTitle} onChange={(value) => setContent((prev) => ({ ...prev, featureTitle: value }))} />
+          <h3>{t.featuresSection}</h3>
+          <InputField label={t.sectionHeading} value={content.featureTitle} onChange={(value) => setContent((prev) => ({ ...prev, featureTitle: value }))} />
           {content.featureItems.map((item, index) => (
             <div key={`feature-${index}`} className="nm-admin-group">
-              <h4>Карточка {index + 1}</h4>
-              <InputField label="Заголовок" value={item.title} onChange={(value) => updateFeature(index, 'title', value)} />
-              <TextareaField label="Описание" value={item.text} onChange={(value) => updateFeature(index, 'text', value)} />
+              <h4>{t.card} {index + 1}</h4>
+              <InputField label={t.headingLabel} value={item.title} onChange={(value) => updateFeature(index, 'title', value)} />
+              <TextareaField label={t.descriptionLabel} value={item.text} onChange={(value) => updateFeature(index, 'text', value)} />
               <ImageInputField
-                label="Іконка"
+                label={t.iconLabel}
                 value={item.icon}
                 onChange={(value) => updateFeature(index, 'icon', value)}
                 onFileSelect={(file) => handleImageUploadGeneric(file, (url) => updateFeature(index, 'icon', url))}
                 isLoading={uploadingImage !== null}
+                linkLabel={t.linkMode}
+                uploadLabel={t.uploadMode}
+                currentLabel={t.currentImage}
+                uploadingLabel={t.uploading}
               />
               <label className="nm-admin-field">
-                <span>Размер шрифта заголовка: {item.headerFontSize ?? 18}px</span>
+                <span>{t.headerFontSize}: {item.headerFontSize ?? 18}px</span>
                 <input type="range" min={14} max={48} value={item.headerFontSize ?? 18} onChange={(e) => updateFeature(index, 'headerFontSize', Number(e.target.value))} />
               </label>
               <label className="nm-admin-field">
-                <span>Размер шрифта описания: {item.descFontSize ?? 14}px</span>
+                <span>{t.descFontSize}: {item.descFontSize ?? 14}px</span>
                 <input type="range" min={12} max={24} value={item.descFontSize ?? 14} onChange={(e) => updateFeature(index, 'descFontSize', Number(e.target.value))} />
               </label>
               <label className="nm-admin-field">
-                <span>Дополнительная информация (HTML)</span>
-                <textarea rows={4} value={item.extraContent ?? ''} onChange={(e) => updateFeature(index, 'extraContent', e.target.value)} placeholder="Если заполнено — карточка станет кликабельной" />
+                <span>{t.extraContentLabel}</span>
+                <textarea rows={4} value={item.extraContent ?? ''} onChange={(e) => updateFeature(index, 'extraContent', e.target.value)} placeholder={t.extraContentHint} />
               </label>
               {(item.extraContent ?? '').trim() && (
                 <label className="nm-admin-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem' }}>
-                  <span>Открывать на новой странице</span>
+                  <span>{t.openNewPage}</span>
                   <input type="checkbox" checked={item.isNewPage ?? false} onChange={(e) => updateFeature(index, 'isNewPage', e.target.checked)} />
                 </label>
               )}
               <button type="button" className="nm-btn nm-btn-secondary" style={{ marginTop: '0.25rem', alignSelf: 'flex-start' }} onClick={() => { updateFeature(index, 'headerFontSize', undefined as unknown as number); updateFeature(index, 'descFontSize', undefined as unknown as number); }}>
-                Сбросить размеры
+                {t.resetSizes}
               </button>
             </div>
           ))}
         </div>
 
         <div className="nm-admin-card">
-          <h3>Секция процесса</h3>
-          <InputField label="Заголовок секции" value={content.processTitle} onChange={(value) => setContent((prev) => ({ ...prev, processTitle: value }))} />
+          <h3>{t.processSection}</h3>
+          <InputField label={t.sectionHeading} value={content.processTitle} onChange={(value) => setContent((prev) => ({ ...prev, processTitle: value }))} />
           {content.processItems.map((item, index) => (
             <div key={`process-${index}`} className="nm-admin-group">
-              <h4>Шаг {index + 1}</h4>
-              <InputField label="Заголовок" value={item.title} onChange={(value) => updateProcess(index, 'title', value)} />
-              <TextareaField label="Описание" value={item.text} onChange={(value) => updateProcess(index, 'text', value)} />
+              <h4>{t.step} {index + 1}</h4>
+              <InputField label={t.headingLabel} value={item.title} onChange={(value) => updateProcess(index, 'title', value)} />
+              <TextareaField label={t.descriptionLabel} value={item.text} onChange={(value) => updateProcess(index, 'text', value)} />
               <ImageInputField
-                label="Іконка"
+                label={t.iconLabel}
                 value={item.icon}
                 onChange={(value) => updateProcess(index, 'icon', value)}
                 onFileSelect={(file) => handleImageUploadGeneric(file, (url) => updateProcess(index, 'icon', url))}
                 isLoading={uploadingImage !== null}
+                linkLabel={t.linkMode}
+                uploadLabel={t.uploadMode}
+                currentLabel={t.currentImage}
+                uploadingLabel={t.uploading}
               />
               <label className="nm-admin-field">
-                <span>Размер шрифта заголовка: {item.headerFontSize ?? 18}px</span>
+                <span>{t.headerFontSize}: {item.headerFontSize ?? 18}px</span>
                 <input type="range" min={14} max={48} value={item.headerFontSize ?? 18} onChange={(e) => updateProcess(index, 'headerFontSize', Number(e.target.value))} />
               </label>
               <label className="nm-admin-field">
-                <span>Размер шрифта описания: {item.descFontSize ?? 14}px</span>
+                <span>{t.descFontSize}: {item.descFontSize ?? 14}px</span>
                 <input type="range" min={12} max={24} value={item.descFontSize ?? 14} onChange={(e) => updateProcess(index, 'descFontSize', Number(e.target.value))} />
               </label>
               <label className="nm-admin-field">
-                <span>Дополнительная информация (HTML)</span>
-                <textarea rows={4} value={item.extraContent ?? ''} onChange={(e) => updateProcess(index, 'extraContent', e.target.value)} placeholder="Если заполнено — карточка станет кликабельной" />
+                <span>{t.extraContentLabel}</span>
+                <textarea rows={4} value={item.extraContent ?? ''} onChange={(e) => updateProcess(index, 'extraContent', e.target.value)} placeholder={t.extraContentHint} />
               </label>
               {(item.extraContent ?? '').trim() && (
                 <label className="nm-admin-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem' }}>
-                  <span>Открывать на новой странице</span>
+                  <span>{t.openNewPage}</span>
                   <input type="checkbox" checked={item.isNewPage ?? false} onChange={(e) => updateProcess(index, 'isNewPage', e.target.checked)} />
                 </label>
               )}
               <button type="button" className="nm-btn nm-btn-secondary" style={{ marginTop: '0.25rem', alignSelf: 'flex-start' }} onClick={() => { updateProcess(index, 'headerFontSize', undefined as unknown as number); updateProcess(index, 'descFontSize', undefined as unknown as number); }}>
-                Сбросить размеры
+                {t.resetSizes}
               </button>
             </div>
           ))}
         </div>
 
         <div className="nm-admin-card">
-          <h3>Сторителлинг блоки</h3>
-          <InputField label="Левый блок заголовок" value={content.storyLeft.title} onChange={(value) => setContent((prev) => ({ ...prev, storyLeft: { ...prev.storyLeft, title: value } }))} />
-          <TextareaField label="Левый блок текст" value={content.storyLeft.text} onChange={(value) => setContent((prev) => ({ ...prev, storyLeft: { ...prev.storyLeft, text: value } }))} />
+          <h3>{t.storyBlocks}</h3>
+          <InputField label={t.storyLeftTitle} value={content.storyLeft.title} onChange={(value) => setContent((prev) => ({ ...prev, storyLeft: { ...prev.storyLeft, title: value } }))} />
+          <TextareaField label={t.storyLeftText} value={content.storyLeft.text} onChange={(value) => setContent((prev) => ({ ...prev, storyLeft: { ...prev.storyLeft, text: value } }))} />
           <ImageInputField
-            label="Ліве зображення"
+            label={t.storyLeftImage}
             value={content.storyLeft.image}
             onChange={(value) => setContent((prev) => ({ ...prev, storyLeft: { ...prev.storyLeft, image: value } }))}
             onFileSelect={(file) => handleImageUploadGeneric(file, (url) => setContent((prev) => ({ ...prev, storyLeft: { ...prev.storyLeft, image: url } })))}
             isLoading={uploadingImage !== null}
+            linkLabel={t.linkMode}
+            uploadLabel={t.uploadMode}
+            currentLabel={t.currentImage}
+            uploadingLabel={t.uploading}
           />
-          <InputField label="Правый блок заголовок" value={content.storyRight.title} onChange={(value) => setContent((prev) => ({ ...prev, storyRight: { ...prev.storyRight, title: value } }))} />
-          <TextareaField label="Правый блок текст" value={content.storyRight.text} onChange={(value) => setContent((prev) => ({ ...prev, storyRight: { ...prev.storyRight, text: value } }))} />
+          <InputField label={t.storyRightTitle} value={content.storyRight.title} onChange={(value) => setContent((prev) => ({ ...prev, storyRight: { ...prev.storyRight, title: value } }))} />
+          <TextareaField label={t.storyRightText} value={content.storyRight.text} onChange={(value) => setContent((prev) => ({ ...prev, storyRight: { ...prev.storyRight, text: value } }))} />
           <ImageInputField
-            label="Праве зображення"
+            label={t.storyRightImage}
             value={content.storyRight.image}
             onChange={(value) => setContent((prev) => ({ ...prev, storyRight: { ...prev.storyRight, image: value } }))}
             onFileSelect={(file) => handleImageUploadGeneric(file, (url) => setContent((prev) => ({ ...prev, storyRight: { ...prev.storyRight, image: url } })))}
             isLoading={uploadingImage !== null}
+            linkLabel={t.linkMode}
+            uploadLabel={t.uploadMode}
+            currentLabel={t.currentImage}
+            uploadingLabel={t.uploading}
           />
         </div>
 
         <div className="nm-admin-card">
-          <h3>Командный блок</h3>
-          <InputField label="Заголовок" value={content.teamSection.title} onChange={(value) => setContent((prev) => ({ ...prev, teamSection: { ...prev.teamSection, title: value } }))} />
-          <TextareaField label="Текст" value={content.teamSection.text} onChange={(value) => setContent((prev) => ({ ...prev, teamSection: { ...prev.teamSection, text: value } }))} />
+          <h3>{t.teamBlock}</h3>
+          <InputField label={t.teamTitle} value={content.teamSection.title} onChange={(value) => setContent((prev) => ({ ...prev, teamSection: { ...prev.teamSection, title: value } }))} />
+          <TextareaField label={t.teamText} value={content.teamSection.text} onChange={(value) => setContent((prev) => ({ ...prev, teamSection: { ...prev.teamSection, text: value } }))} />
           <ImageInputField
-            label="Зображення команди"
+            label={t.teamImage}
             value={content.teamSection.image}
             onChange={(value) => setContent((prev) => ({ ...prev, teamSection: { ...prev.teamSection, image: value } }))}
             onFileSelect={(file) => handleImageUploadGeneric(file, (url) => setContent((prev) => ({ ...prev, teamSection: { ...prev.teamSection, image: url } })))}
             isLoading={uploadingImage !== null}
+            linkLabel={t.linkMode}
+            uploadLabel={t.uploadMode}
+            currentLabel={t.currentImage}
+            uploadingLabel={t.uploading}
           />
         </div>
 
         <div className="nm-admin-actions">
           <button type="button" className="nm-btn nm-btn-primary" onClick={save} disabled={isSaving}>
-            {isSaving ? 'Сохраняем...' : 'Сохранить изменения'}
+            {isSaving ? t.savingBtn : t.saveBtn}
+          </button>
+          <button type="button" className="nm-btn nm-btn-secondary" onClick={autoTranslate} disabled={isSaving}>
+            {isSaving ? t.translating : t.translateBtn}
           </button>
           <button type="button" className="nm-btn nm-btn-secondary" onClick={reset} disabled={isSaving}>
-            Сбросить к шаблону
+            {t.resetBtn}
           </button>
           <Link href={`/${locale}`} className="nm-btn nm-btn-secondary">
-            Открыть главную
+            {t.openMain}
           </Link>
         </div>
 

@@ -8,6 +8,7 @@ import { ProcessedPaymentsAdmin } from '@/components/admin/processed-payments-ad
 import { WithdrawalRequestsAdmin } from '@/components/admin/withdrawal-requests-admin';
 import type { Locale } from '@/i18n/config';
 import type { HomeContent } from '@/i18n/home-content';
+import { getAdminMessages } from '@/i18n/admin-messages';
 import { HomeEditor } from '@/components/admin/home-editor';
 import { UserRoleManager } from '@/components/admin/user-role-manager';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
@@ -15,6 +16,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 type AdminTab = 'content' | 'users' | 'deposits';
 
 export function AdminShell({ locale }: { locale: Locale }) {
+  const t = useMemo(() => getAdminMessages(locale), [locale]);
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,7 +100,7 @@ export function AdminShell({ locale }: { locale: Locale }) {
       window.location.reload();
     } else {
       const data = (await res.json()) as { error?: string };
-      alert(data.error ?? 'Ошибка');
+      alert(data.error ?? t.error);
     }
   }
 
@@ -106,7 +108,7 @@ export function AdminShell({ locale }: { locale: Locale }) {
     return (
       <main className="nm-register-page">
         <section className="nm-register-card">
-          <h1>Загружаем админ-панель...</h1>
+          <h1>{t.loadingAdmin}</h1>
         </section>
       </main>
     );
@@ -116,17 +118,17 @@ export function AdminShell({ locale }: { locale: Locale }) {
     return (
       <main className="nm-register-page">
         <section className="nm-register-card">
-          <h1 style={{ color: '#e74c3c' }}>Доступ запрещён</h1>
+          <h1 style={{ color: '#e74c3c' }}>{t.accessDenied}</h1>
           <p style={{ opacity: 0.7, marginTop: '0.5rem' }}>
-            Эта страница доступна только администратору.
+            {t.accessDeniedText}
           </p>
           {canBootstrap && (
             <div style={{ marginTop: '1.25rem' }}>
               <p style={{ marginBottom: '0.75rem', fontSize: '0.85rem', opacity: 0.65 }}>
-                Ни одного администратора ещё нет — вы можете взять роль:
+                {t.noAdminYet}
               </p>
               <button className="nm-btn nm-btn-primary" onClick={claimAdmin} disabled={bootstrapping}>
-                {bootstrapping ? 'Подождите...' : 'Стать администратором'}
+                {bootstrapping ? t.wait : t.becomeAdmin}
               </button>
             </div>
           )}
@@ -143,19 +145,19 @@ export function AdminShell({ locale }: { locale: Locale }) {
             className={`nm-admin-tab${tab === 'content' ? ' active' : ''}`}
             onClick={() => setTab('content')}
           >
-            Контент сайта
+            {t.tabContent}
           </button>
           <button
             className={`nm-admin-tab${tab === 'users' ? ' active' : ''}`}
             onClick={() => setTab('users')}
           >
-            Пользователи
+            {t.tabUsers}
           </button>
           <button
             className={`nm-admin-tab${tab === 'deposits' ? ' active' : ''}`}
             onClick={() => setTab('deposits')}
           >
-            ПК: взноси та реєстр пайщиків
+            {t.tabDeposits}
           </button>
         </nav>
       </div>
@@ -172,16 +174,16 @@ export function AdminShell({ locale }: { locale: Locale }) {
 
       {tab === 'deposits' && accessToken ? (
         <section className="nm-register-card" style={{ maxWidth: '900px' }}>
-          <ProcessedPaymentsAdmin accessToken={accessToken} />
-          <DepositRequestsAdmin accessToken={accessToken} />
-          <WithdrawalRequestsAdmin accessToken={accessToken} />
-          <CoopRegistryExport accessToken={accessToken} />
+          <ProcessedPaymentsAdmin accessToken={accessToken} locale={locale} />
+          <DepositRequestsAdmin accessToken={accessToken} locale={locale} />
+          <WithdrawalRequestsAdmin accessToken={accessToken} locale={locale} />
+          <CoopRegistryExport accessToken={accessToken} locale={locale} />
         </section>
       ) : null}
 
       {tab === 'content' && !content ? (
         <section className="nm-register-card">
-          <p className="nm-admin-hint">Не вдалося завантажити контент головної сторінки.</p>
+          <p className="nm-admin-hint">{t.contentLoadError}</p>
         </section>
       ) : null}
     </main>

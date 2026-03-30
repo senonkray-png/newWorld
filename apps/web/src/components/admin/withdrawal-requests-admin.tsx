@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { Locale } from '@/i18n/config';
+import { getAdminMessages } from '@/i18n/admin-messages';
 import type { WithdrawalRequestAdminRow } from '@/lib/pai-store';
 
-export function WithdrawalRequestsAdmin({ accessToken }: { accessToken: string }) {
+export function WithdrawalRequestsAdmin({ accessToken, locale }: { accessToken: string; locale: Locale }) {
+  const t = useMemo(() => getAdminMessages(locale), [locale]);
   const [items, setItems] = useState<WithdrawalRequestAdminRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState('');
@@ -73,14 +76,14 @@ export function WithdrawalRequestsAdmin({ accessToken }: { accessToken: string }
   const pending = useMemo(() => items.filter((i) => i.status === 'pending'), [items]);
 
   if (loading) {
-    return <p>Завантаження заявок на повернення...</p>;
+    return <p>{t.loadingWithdrawals}</p>;
   }
 
   return (
     <div style={{ marginTop: '2rem' }}>
-      <h2 style={{ marginTop: 0 }}>Повернення паєвого внеску</h2>
+      <h2 style={{ marginTop: 0 }}>{t.withdrawalsTitle}</h2>
       <p className="nm-admin-hint" style={{ marginBottom: '1rem' }}>
-        Очікують: {pending.length}. Підтвердіть виплату на картку поза системою; баланс паєвих одиниць зменшується в реєстрі.
+        {t.withdrawalsPending}: {pending.length}. {t.withdrawalsHint}
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -91,20 +94,20 @@ export function WithdrawalRequestsAdmin({ accessToken }: { accessToken: string }
               <span style={{ opacity: 0.7, marginLeft: '0.5rem' }}>{new Date(item.createdAt).toLocaleString('uk-UA')}</span>
             </div>
             <div>
-              Паєві одиниці до повернення: <strong>{item.amountPai.toFixed(2)}</strong>
+              {t.unitsToReturn}: <strong>{item.amountPai.toFixed(2)}</strong>
             </div>
-            <div>Підстава: {item.reason}</div>
+            <div>{t.reason}: {item.reason}</div>
             <div>
-              Статус: <strong>{item.status}</strong>
+              {t.status}: <strong>{item.status}</strong>
               {item.adminComment ? <span> — {item.adminComment}</span> : null}
             </div>
             {item.status === 'pending' ? (
               <div className="nm-admin-actions">
                 <button type="button" className="nm-btn nm-btn-primary" disabled={busyId === item.id} onClick={() => void approve(item.id)}>
-                  {busyId === item.id ? '...' : 'Підтвердити виплату'}
+                  {busyId === item.id ? '...' : t.confirmPayout}
                 </button>
                 <button type="button" className="nm-btn nm-btn-secondary" disabled={busyId === item.id} onClick={() => openReject(item.id)}>
-                  Відхилити
+                  {t.reject}
                 </button>
               </div>
             ) : null}
@@ -112,22 +115,22 @@ export function WithdrawalRequestsAdmin({ accessToken }: { accessToken: string }
         ))}
       </div>
 
-      {items.length === 0 ? <p className="nm-admin-hint">Заявок немає.</p> : null}
+      {items.length === 0 ? <p className="nm-admin-hint">{t.noWithdrawals}</p> : null}
 
       {rejectId ? (
         <div className="nm-modal-backdrop" onClick={() => setRejectId('')}>
           <div className="nm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Причина відхилення</h3>
+            <h3>{t.rejectReason}</h3>
             <label className="nm-admin-field">
-              <span>Коментар</span>
+              <span>{t.rejectComment}</span>
               <textarea rows={3} value={comment} onChange={(e) => setComment(e.target.value)} />
             </label>
             <div className="nm-admin-actions">
               <button type="button" className="nm-btn nm-btn-primary" onClick={() => void submitReject()} disabled={comment.trim().length < 3 || Boolean(busyId)}>
-                Відхилити заявку
+                {t.rejectRequest}
               </button>
               <button type="button" className="nm-btn nm-btn-secondary" onClick={() => setRejectId('')}>
-                Закрити
+                {t.close}
               </button>
             </div>
           </div>

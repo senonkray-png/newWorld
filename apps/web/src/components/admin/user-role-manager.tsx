@@ -3,19 +3,19 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import type { Locale } from '@/i18n/config';
+import { getAdminMessages } from '@/i18n/admin-messages';
 import type { UserProfile, UserRole } from '@/lib/profile-store';
 import { userRoleValues } from '@/lib/profile-store';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
-const ROLE_LABELS: Record<UserRole, string> = {
-  member: 'Потребитель',
-  provider: 'Поставщик',
-  organizer: 'Организатор',
-  main_admin: 'Главный админ',
-};
-
 export function UserRoleManager({ locale }: { locale: Locale }) {
-  void locale;
+  const t = useMemo(() => getAdminMessages(locale), [locale]);
+  const roleLabels: Record<UserRole, string> = useMemo(() => ({
+    member: t.roleConsumer,
+    provider: t.roleProvider,
+    organizer: t.roleOrganizer,
+    main_admin: t.roleMainAdmin,
+  }), [t]);
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [token, setToken] = useState<string | null>(null);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -50,7 +50,7 @@ export function UserRoleManager({ locale }: { locale: Locale }) {
         setLoading(false);
       })
       .catch(() => {
-        setError('Не удалось загрузить пользователей');
+        setError(t.loadUsersError);
         setLoading(false);
       });
   }, [token]);
@@ -83,7 +83,7 @@ export function UserRoleManager({ locale }: { locale: Locale }) {
 
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
-        setError(data.error ?? 'Ошибка сохранения');
+        setError(data.error ?? t.saveRoleError);
       } else {
         setUsers((prev) =>
           prev.map((u) => (u.userId === userId ? { ...u, role } : u)),
@@ -97,7 +97,7 @@ export function UserRoleManager({ locale }: { locale: Locale }) {
         setTimeout(() => setSuccessId(null), 2000);
       }
     } catch {
-      setError('Ошибка сети');
+      setError(t.networkError);
     } finally {
       setSaving(null);
     }
@@ -113,17 +113,17 @@ export function UserRoleManager({ locale }: { locale: Locale }) {
   });
 
   if (loading) {
-    return <p className="nm-admin-loading">Загрузка пользователей...</p>;
+    return <p className="nm-admin-loading">{t.loadingUsers}</p>;
   }
 
   return (
     <div className="nm-user-role-manager">
-      <h2 className="nm-admin-section-title">Управление ролями</h2>
+      <h2 className="nm-admin-section-title">{t.manageRoles}</h2>
 
       <input
         className="nm-catalog-search-bar"
         type="text"
-        placeholder="Поиск по имени или email..."
+        placeholder={t.searchPlaceholder}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         style={{ marginBottom: '1rem' }}
@@ -135,9 +135,9 @@ export function UserRoleManager({ locale }: { locale: Locale }) {
         <table className="nm-role-table">
           <thead>
             <tr>
-              <th>Пользователь</th>
-              <th>Email</th>
-              <th>Роль</th>
+              <th>{t.userCol}</th>
+              <th>{t.emailCol}</th>
+              <th>{t.roleCol}</th>
               <th></th>
             </tr>
           </thead>
@@ -166,21 +166,21 @@ export function UserRoleManager({ locale }: { locale: Locale }) {
                     >
                       {userRoleValues.map((r) => (
                         <option key={r} value={r}>
-                          {ROLE_LABELS[r]}
+                          {roleLabels[r]}
                         </option>
                       ))}
                     </select>
                   </td>
                   <td className="nm-role-cell-action">
                     {isSuccess ? (
-                      <span className="nm-role-saved">✓ Сохранено</span>
+                      <span className="nm-role-saved">{t.saved}</span>
                     ) : (
                       <button
                         className="nm-btn nm-btn-primary nm-role-save-btn"
                         onClick={() => saveRole(user.userId)}
                         disabled={!isDirty || isSaving}
                       >
-                        {isSaving ? '...' : 'Сохранить'}
+                        {isSaving ? '...' : t.saveRole}
                       </button>
                     )}
                   </td>
@@ -190,7 +190,7 @@ export function UserRoleManager({ locale }: { locale: Locale }) {
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={4} style={{ textAlign: 'center', padding: '1.5rem', opacity: 0.5 }}>
-                  Пользователи не найдены
+                  {t.noUsersFound}
                 </td>
               </tr>
             )}
