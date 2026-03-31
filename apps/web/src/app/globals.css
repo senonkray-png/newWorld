@@ -572,9 +572,8 @@ a {
 }
 
 .nm-admin-layout {
-  width: min(1220px, calc(100% - clamp(16px, 2vw, 28px)));
-  margin: 0 auto;
-  padding: clamp(88px, 12vw, 116px) 0 clamp(36px, 5vw, 64px);
+  width: 100%;
+  padding: 0;
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: clamp(10px, 1.5vw, 16px);
@@ -1454,24 +1453,12 @@ a {
   .nm-admin-layout {
     grid-template-columns: 1fr;
     gap: 8px;
+    padding: 0;
+    width: 100%;
+    margin: 0;
   }
 
   .nm-admin-sidebar {
-    position: static;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    border-radius: 12px;
-  }
-
-  .nm-admin-sidebar h1 {
-    font-size: 1rem;
-    margin-right: auto;
-  }
-
-  .nm-admin-sidebar .nm-admin-tabs {
     display: none;
   }
 
@@ -1480,8 +1467,10 @@ a {
   }
 
   .nm-admin-content {
-    padding: 12px;
-    border-radius: 12px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 0;
   }
 
   .nm-admin-head h2 {
@@ -1636,10 +1625,15 @@ a {
   }
 
   .nm-page,
-  .nm-register-page,
-  .nm-admin-layout {
+  .nm-register-page {
     width: calc(100% - 12px);
     padding-top: 74px;
+  }
+
+  .nm-admin-layout {
+    padding: 0;
+    width: 100%;
+    margin: 0;
   }
 
   .nm-hero {
@@ -1811,8 +1805,10 @@ a {
   }
 
   .nm-admin-content {
-    padding: 10px;
-    border-radius: 10px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 0;
   }
 
   .nm-admin-field span {
@@ -1889,10 +1885,15 @@ a {
   }
 
   .nm-page,
-  .nm-register-page,
-  .nm-admin-layout {
+  .nm-register-page {
     width: calc(100% - 8px);
     padding-top: 66px;
+  }
+
+  .nm-admin-layout {
+    padding: 0;
+    width: 100%;
+    margin: 0;
   }
 
   .nm-register-card {
@@ -1912,11 +1913,7 @@ a {
   }
 
   .nm-admin-sidebar {
-    padding: 6px 8px;
-  }
-
-  .nm-admin-sidebar h1 {
-    font-size: 0.86rem;
+    display: none;
   }
 
   .nm-admin-card {
@@ -1925,8 +1922,10 @@ a {
   }
 
   .nm-admin-content {
-    padding: 8px;
-    border-radius: 8px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 0;
   }
 
   .nm-admin-group h4 {
