@@ -1351,8 +1351,7 @@ a {
 
 @media (max-width: 760px) {
   .nm-page,
-  .nm-register-page,
-  .nm-admin-layout {
+  .nm-register-page {
     width: calc(100% - 16px);
     padding-top: 82px;
   }
