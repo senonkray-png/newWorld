@@ -573,13 +573,11 @@ a {
 }
 
 .nm-admin-layout {
-  width: 100%;
-  max-width: 100%;
+  min-width: 0;
   padding: 0;
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   gap: clamp(10px, 1.5vw, 16px);
-  box-sizing: border-box;
 }
 
 .nm-admin-sidebar,
@@ -808,6 +806,7 @@ a {
   margin: 0 auto;
   padding: clamp(88px, 12vw, 116px) 0 clamp(36px, 5vw, 64px);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(10px, 1.5vw, 16px);
   box-sizing: border-box;
 }
@@ -993,6 +992,7 @@ a {
 .nm-admin-card-section {
   max-width: 900px;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -1474,8 +1474,7 @@ a {
     grid-template-columns: minmax(0, 1fr);
     gap: 8px;
     padding: 0;
-    width: 100%;
-    margin: 0;
+    min-width: 0;
   }
 
   .nm-admin-sidebar {
@@ -1652,8 +1651,7 @@ a {
 
   .nm-admin-layout {
     padding: 0;
-    width: 100%;
-    margin: 0;
+    min-width: 0;
   }
 
   .nm-hero {
@@ -1912,8 +1910,7 @@ a {
 
   .nm-admin-layout {
     padding: 0;
-    width: 100%;
-    margin: 0;
+    min-width: 0;
   }
 
   .nm-register-card {
