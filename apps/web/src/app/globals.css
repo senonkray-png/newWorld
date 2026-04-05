@@ -39,17 +39,380 @@
   --nm-muted: rgba(0, 0, 0, 0.04);
   --nm-shadow: 0 24px 48px rgba(0, 0, 0, 0.08);
   --nm-focus: rgba(184, 148, 46, 0.3);
-  --nm-success: #22c55e;
-  --nm-success-bg: rgba(34, 197, 94, 0.1);
-  --nm-danger: #ef4444;
-  --nm-danger-bg: rgba(239, 68, 68, 0.1);
-  --nm-warning: #f59e0b;
-  --nm-warning-bg: rgba(245, 158, 11, 0.1);
-  --nm-info: #3b82f6;
-  --nm-info-bg: rgba(59, 130, 246, 0.1);
+  --nm-success: #16a34a;
+  --nm-success-bg: rgba(22, 163, 74, 0.1);
+  --nm-danger: #dc2626;
+  --nm-danger-bg: rgba(220, 38, 38, 0.1);
+  --nm-warning: #d97706;
+  --nm-warning-bg: rgba(217, 119, 6, 0.1);
+  --nm-info: #2563eb;
+  --nm-info-bg: rgba(37, 99, 235, 0.1);
 }
+
+/* ── Light theme — element overrides ────────────────────────────── */
 :root.nm-light ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); }
 :root.nm-light ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25); }
+
+/* Header / nav glass */
+:root.nm-light .nm-site-header {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
+}
+:root.nm-light .nm-top-header {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* Text & branding colors */
+:root.nm-light .nm-site-title,
+:root.nm-light .nm-brand-mark { color: #1a1a2e; }
+
+/* Burger button */
+:root.nm-light .nm-burger-btn {
+  border-color: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.04);
+}
+:root.nm-light .nm-burger-btn:hover { background: rgba(0, 0, 0, 0.08); }
+:root.nm-light .nm-burger-btn span { background: #1a1a2e; }
+
+/* Dropdown triggers (lang, user) */
+:root.nm-light .nm-lang-trigger,
+:root.nm-light .nm-user-trigger {
+  border-color: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.03);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-lang-trigger:hover,
+:root.nm-light .nm-user-trigger:hover {
+  background: rgba(0, 0, 0, 0.07);
+  border-color: rgba(0, 0, 0, 0.25);
+}
+:root.nm-light .nm-user-trigger--auth {
+  border-color: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.06);
+}
+:root.nm-light .nm-user-dot { border-color: var(--nm-bg); }
+
+/* Auth link button */
+:root.nm-light .nm-auth-link-btn {
+  border-color: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.04);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-auth-link-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+/* Dropdown menu */
+:root.nm-light .nm-dropdown-menu {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+:root.nm-light .nm-dropdown-item,
+:root.nm-light .nm-dropdown-btn { color: #333; }
+:root.nm-light .nm-dropdown-item:hover,
+:root.nm-light .nm-dropdown-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-dropdown-item.active {
+  background: rgba(0, 0, 0, 0.08);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-dropdown-item--accent { color: #2563eb; }
+:root.nm-light .nm-dropdown-item--accent:hover { color: #1d4ed8; }
+
+/* Notification dropdown */
+:root.nm-light .nm-notification-dropdown {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+}
+:root.nm-light .nm-notification-item {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-notification-item--unread {
+  border-color: rgba(37, 99, 235, 0.4);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+/* Message badge */
+:root.nm-light .nm-message-badge { border-color: var(--nm-bg); }
+
+/* Logout btn */
+:root.nm-light .nm-logout-btn {
+  border-color: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.04);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-logout-btn:hover { background: rgba(0, 0, 0, 0.08); }
+
+/* Hero text */
+:root.nm-light .nm-hero-body { color: #ffffff; }
+:root.nm-light .nm-hero-body p { color: #e0e0e0; }
+
+/* Buttons */
+:root.nm-light .nm-btn-primary { color: #ffffff; }
+:root.nm-light .nm-btn-secondary {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--nm-ink);
+}
+:root.nm-light .nm-btn-secondary:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.07);
+}
+
+/* Cards & panels shadow */
+:root.nm-light .nm-panel:hover,
+:root.nm-light .nm-process-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+:root.nm-light .nm-process {
+  background: linear-gradient(180deg, #f8f8f5 0%, #f0f0eb 100%);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Admin tabs */
+:root.nm-light .nm-admin-tabs span {
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.5);
+}
+:root.nm-light .nm-admin-tabs .active {
+  background: rgba(184, 148, 46, 0.12);
+  color: #8b6d1a;
+}
+:root.nm-light .nm-admin-tab {
+  color: rgba(0, 0, 0, 0.45);
+}
+:root.nm-light .nm-admin-tab:hover { color: var(--nm-ink); }
+:root.nm-light .nm-admin-tab.active {
+  color: var(--nm-primary);
+  border-bottom-color: var(--nm-primary);
+}
+
+/* Admin fields */
+:root.nm-light .nm-admin-field span { color: rgba(0, 0, 0, 0.6); }
+:root.nm-light .nm-admin-field input,
+:root.nm-light .nm-admin-field textarea,
+:root.nm-light .nm-admin-field select,
+:root.nm-light .nm-admin-input,
+:root.nm-light .nm-admin-input-text,
+:root.nm-light .nm-admin-input-file {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--nm-ink);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+:root.nm-light .nm-admin-hint { color: rgba(0, 0, 0, 0.4); }
+:root.nm-light .nm-admin-button-item { background: rgba(0, 0, 0, 0.02); }
+:root.nm-light .nm-admin-new-button {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+:root.nm-light .nm-admin-image-tabs { border-color: rgba(0, 0, 0, 0.1); }
+
+/* Cabinet nav btn */
+:root.nm-light .nm-cabinet-nav-btn {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.55);
+}
+:root.nm-light .nm-cabinet-nav-btn:hover { background: rgba(0, 0, 0, 0.06); }
+:root.nm-light .nm-cabinet-nav-btn.active {
+  border-color: rgba(184, 148, 46, 0.45);
+  background: rgba(184, 148, 46, 0.1);
+  color: #8b6d1a;
+}
+
+/* Cabinet list items */
+:root.nm-light .nm-cabinet-list-item { background: rgba(0, 0, 0, 0.02); }
+
+/* Profile avatar placeholder */
+:root.nm-light .nm-profile-avatar { background: rgba(0, 0, 0, 0.03); }
+
+/* Market card */
+:root.nm-light .nm-market-card:hover { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08); }
+:root.nm-light .nm-market-price { color: #8b6d1a; }
+:root.nm-light .nm-market-image { background: rgba(0, 0, 0, 0.03); }
+
+/* Service switch */
+:root.nm-light .nm-service-switch-btn {
+  background: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.5);
+}
+:root.nm-light .nm-service-switch-btn.active {
+  background: rgba(184, 148, 46, 0.15);
+  color: #8b6d1a;
+}
+
+/* Icon button */
+:root.nm-light .nm-icon-btn { background: rgba(0, 0, 0, 0.03); }
+:root.nm-light .nm-icon-btn:hover { background: rgba(0, 0, 0, 0.07); }
+
+/* Catalog filters */
+:root.nm-light .nm-catalog-filters {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* User list */
+:root.nm-light .nm-user-list-avatar { background: rgba(0, 0, 0, 0.03); }
+:root.nm-light .nm-user-list-avatar-placeholder {
+  background: rgba(184, 148, 46, 0.1);
+  color: #8b6d1a;
+}
+:root.nm-light .nm-user-list-name:hover { color: #8b6d1a; }
+:root.nm-light .nm-user-list-role {
+  background: rgba(184, 148, 46, 0.1);
+  color: #8b6d1a;
+}
+:root.nm-light .nm-profile-role-tag {
+  background: rgba(184, 148, 46, 0.1);
+  color: #8b6d1a;
+}
+
+/* Modal */
+:root.nm-light .nm-modal-backdrop { background: rgba(0, 0, 0, 0.35); }
+:root.nm-light .nm-modal {
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.15);
+}
+:root.nm-light .nm-modal-overlay { background: rgba(0, 0, 0, 0.35); }
+:root.nm-light .nm-modal-content { border-color: rgba(0, 0, 0, 0.1); }
+
+/* Messages */
+:root.nm-light .nm-messages-user {
+  background: rgba(0, 0, 0, 0.02);
+}
+:root.nm-light .nm-messages-user.active {
+  border-color: rgba(184, 148, 46, 0.35);
+  background: rgba(184, 148, 46, 0.06);
+}
+:root.nm-light .nm-messages-contact-avatar { background: rgba(0, 0, 0, 0.03); }
+:root.nm-light .nm-bubble {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+:root.nm-light .nm-bubble-own {
+  background: rgba(184, 148, 46, 0.1);
+  border-color: rgba(184, 148, 46, 0.2);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-bubble small { color: rgba(0, 0, 0, 0.4); }
+:root.nm-light .nm-bubble-own small { color: rgba(139, 109, 26, 0.6); }
+
+/* Chat shell */
+:root.nm-light .nm-chat-shell { box-shadow: 0 24px 48px rgba(0, 0, 0, 0.08); }
+:root.nm-light .nm-chat-sidebar {
+  background: linear-gradient(180deg, #e8e8e2 0%, #deded8 100%);
+  color: #1a1a2e;
+  border-right-color: rgba(0, 0, 0, 0.08);
+}
+:root.nm-light .nm-chat-sidebar-head h1 { color: #1a1a2e; }
+:root.nm-light .nm-chat-sidebar-head p { color: rgba(0, 0, 0, 0.6); }
+:root.nm-light .nm-chat-status { color: #dc2626; }
+:root.nm-light .nm-chat-search {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.7);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-chat-search::placeholder { color: rgba(0, 0, 0, 0.4); }
+:root.nm-light .nm-chat-filter-toggle {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.04);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-chat-filter-toggle.active { background: rgba(0, 0, 0, 0.08); }
+:root.nm-light .nm-chat-filters-panel {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+:root.nm-light .nm-chat-filters-panel .nm-admin-field span { color: #1a1a2e; }
+:root.nm-light .nm-chat-filters-panel select {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-chat-list-title { color: rgba(0, 0, 0, 0.45); }
+:root.nm-light .nm-chat-empty-label { color: rgba(0, 0, 0, 0.4); }
+:root.nm-light .nm-chat-contact {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.5);
+  color: #1a1a2e;
+}
+:root.nm-light .nm-chat-contact:hover { background: rgba(255, 255, 255, 0.8); }
+:root.nm-light .nm-chat-contact.active {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.08);
+}
+:root.nm-light .nm-chat-contact-line,
+:root.nm-light .nm-chat-contact small,
+:root.nm-light .nm-chat-contact .nm-messages-contact-text span,
+:root.nm-light .nm-chat-contact .nm-messages-contact-text small {
+  color: rgba(0, 0, 0, 0.55);
+}
+:root.nm-light .nm-chat-dialog-avatar {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.03);
+}
+:root.nm-light .nm-chat-dialog-avatar-placeholder {
+  background: #c4c4be;
+  color: #1a1a2e;
+}
+:root.nm-light .nm-chat-dialog-top small { color: rgba(0, 0, 0, 0.45); }
+:root.nm-light .nm-chat-thread {
+  background: linear-gradient(180deg, var(--nm-card) 0%, #f0f0eb 100%);
+}
+:root.nm-light .nm-chat-thread-head { border-bottom-color: rgba(0, 0, 0, 0.08); }
+:root.nm-light .nm-chat-thread-user small { color: rgba(0, 0, 0, 0.4); }
+:root.nm-light .nm-chat-back-btn {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.6);
+}
+:root.nm-light .nm-chat-back-btn:hover { background: rgba(0, 0, 0, 0.07); }
+:root.nm-light .nm-chat-compose-wrap { border-top-color: rgba(0, 0, 0, 0.08); }
+:root.nm-light .nm-chat-compose-actions { color: rgba(0, 0, 0, 0.35); }
+:root.nm-light .nm-chat-send-btn {
+  background: linear-gradient(135deg, #b8942e 0%, #a07e24 100%);
+  color: #ffffff;
+}
+:root.nm-light .nm-messages-contact-avatar {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.03);
+}
+:root.nm-light .nm-messages-contact-avatar-placeholder {
+  background: #c4c4be;
+  color: #1a1a2e;
+}
+
+/* Auth status */
+:root.nm-light .nm-auth-status { color: #dc2626; }
+
+/* Partner card links */
+:root.nm-light .nm-partner-card a { color: #8b6d1a; }
+
+/* Role table */
+:root.nm-light .nm-role-table thead tr { background: rgba(0, 0, 0, 0.03); }
+:root.nm-light .nm-role-table tbody tr:hover { background: rgba(0, 0, 0, 0.02); }
+:root.nm-light .nm-role-avatar-placeholder {
+  background: var(--nm-primary);
+  color: #ffffff;
+}
+
+/* Toggle track in light mode */
+:root.nm-light .nm-toggle-track { background: rgba(0, 0, 0, 0.12); }
+
+/* Subtab */
+:root.nm-light .nm-admin-subtab.active {
+  color: #ffffff;
+}
+
+/* Card interactive hover */
+:root.nm-light .nm-card-interactive:hover { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1); }
 
 * {
   box-sizing: border-box;
