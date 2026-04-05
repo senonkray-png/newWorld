@@ -276,7 +276,7 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
   const [balancePai, setBalancePai] = useState<number>(0);
   const [activationThreshold, setActivationThreshold] = useState(200);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkTheme, setDarkTheme] = useState(true);
+  const [darkTheme, setDarkTheme] = useState(false);
 
   const signOutLabel = locale === 'en' ? 'Sign out' : locale === 'uk' ? 'Вийти' : 'Выйти';
 
@@ -285,8 +285,10 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
     const storedNotif = localStorage.getItem('nm-notifications-enabled');
     if (storedNotif !== null) setNotificationsEnabled(storedNotif === '1');
     const storedTheme = localStorage.getItem('nm-dark-theme');
-    if (storedTheme !== null) setDarkTheme(storedTheme !== '0');
-    if (storedTheme === '0') document.documentElement.classList.add('nm-light');
+    if (storedTheme === '1') {
+      setDarkTheme(true);
+      document.documentElement.classList.remove('nm-light');
+    }
   }, []);
 
   const toggleNotifications = () => {
