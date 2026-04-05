@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { Locale } from '@/i18n/config';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { PaiConversionHint } from '@/components/pai-conversion-hint';
 
 type ProductItem = {
   id: string;
@@ -593,6 +594,7 @@ export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
             <label className="nm-admin-field"><span>{t.name}</span><input value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} /></label>
             <label className="nm-admin-field"><span>{t.description}</span><textarea rows={4} value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} /></label>
             <label className="nm-admin-field"><span>{t.price}</span><input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))} /></label>
+            <PaiConversionHint value={form.price} direction="pai-to-uah" locale={locale} />
             <div className="nm-admin-actions">
               <button type="button" className="nm-btn nm-btn-primary" onClick={submit} disabled={saving}>{saving ? t.saving : editingId ? t.update : t.save}</button>
               <button type="button" className="nm-btn nm-btn-secondary" onClick={closeEditor} disabled={saving}>{t.close}</button>

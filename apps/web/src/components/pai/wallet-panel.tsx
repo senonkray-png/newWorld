@@ -8,6 +8,7 @@ import {
   type PaiTransactionRow,
   type WithdrawalRequestRow,
 } from '@/lib/pai-store';
+import { PaiConversionHint } from '@/components/pai-conversion-hint';
 
 function textByLocale(locale: Locale) {
   if (locale === 'en') {
@@ -488,6 +489,7 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
                 onChange={(e) => setTransferAmount(e.target.value)}
               />
             </label>
+            <PaiConversionHint value={transferAmount} direction="pai-to-uah" locale={locale} rate={uahPerPai} />
             <div className="nm-admin-actions">
               <button type="button" className="nm-btn nm-btn-primary" onClick={() => void submitTransfer()} disabled={transferBusy}>
                 {transferBusy ? t.sending : t.send}
@@ -502,6 +504,7 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
               <span>{t.wdAmount}</span>
               <input type="number" min="0.01" step="0.01" value={wdAmount} onChange={(e) => setWdAmount(e.target.value)} />
             </label>
+            <PaiConversionHint value={wdAmount} direction="pai-to-uah" locale={locale} rate={uahPerPai} />
             <label className="nm-admin-field">
               <span>{t.wdReason}</span>
               <textarea rows={2} value={wdReason} onChange={(e) => setWdReason(e.target.value)} />
