@@ -620,6 +620,7 @@ export function WalletPanel({ locale, token }: { locale: Locale; token: string |
               />
               {helpUploading && <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>⏳</span>}
               {helpReceiptUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={helpReceiptUrl} alt="receipt" style={{ marginTop: '0.5rem', maxHeight: '8rem', borderRadius: '0.4rem' }} />
               )}
             </label>

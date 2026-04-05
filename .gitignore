@@ -11,3 +11,4 @@ apps/cms/dist
 apps/cms/.tmp
 .DS_Store
 .vercel
+.vscode

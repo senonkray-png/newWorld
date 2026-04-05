@@ -53,7 +53,7 @@ export function UserRoleManager({ locale }: { locale: Locale }) {
         setError(t.loadUsersError);
         setLoading(false);
       });
-  }, [token]);
+  }, [token, t.loadUsersError]);
 
   function getRole(user: UserProfile): UserRole {
     return pendingRoles[user.userId] ?? user.role;

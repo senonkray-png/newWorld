@@ -99,33 +99,38 @@ export function UserActions({ locale }: { locale: Locale }) {
         return;
       }
 
-      const response = await fetch('/api/messages', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) setAccessToken(null);
-        setUnreadCount(0);
-        return;
-      }
-
-      const payload = (await response.json()) as {
-        conversations?: Array<{ isOutgoing: boolean; createdAt: string }>;
-      };
-
-      let seenAt = '';
       try {
-        seenAt = localStorage.getItem(seenKey) ?? '';
-      } catch {
-        seenAt = '';
-      }
+        const response = await fetch('/api/messages', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
 
-      const unread = (payload.conversations ?? []).filter(
-        (item) => !item.isOutgoing && (!seenAt || item.createdAt > seenAt),
-      ).length;
-      setUnreadCount(unread);
+        if (!response.ok) {
+          if (response.status === 401) setAccessToken(null);
+          setUnreadCount(0);
+          return;
+        }
+
+        const payload = (await response.json()) as {
+          conversations?: Array<{ isOutgoing: boolean; createdAt: string }>;
+        };
+
+        let seenAt = '';
+        try {
+          seenAt = localStorage.getItem(seenKey) ?? '';
+        } catch {
+          seenAt = '';
+        }
+
+        const unread = (payload.conversations ?? []).filter(
+          (item) => !item.isOutgoing && (!seenAt || item.createdAt > seenAt),
+        ).length;
+        setUnreadCount(unread);
+      } catch (error) {
+        console.error('Failed to load unread messages:', error);
+        setUnreadCount(0);
+      }
     };
 
     loadUnread();
@@ -141,19 +146,26 @@ export function UserActions({ locale }: { locale: Locale }) {
     let alive = true;
 
     const loadNotifications = async () => {
-      const response = await fetch('/api/notifications', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      try {
+        const response = await fetch('/api/notifications', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
 
-      if (!alive || !response.ok) {
-        if (response.status === 401) setAccessToken(null);
-        return;
+        if (!alive || !response.ok) {
+          if (response.status === 401) setAccessToken(null);
+          return;
+        }
+
+        const payload = (await response.json()) as { notifications?: NotificationItem[] };
+        setNotifications(payload.notifications ?? []);
+      } catch (error) {
+        console.error('Failed to load notifications:', error);
+        if (alive) {
+          setNotifications([]);
+        }
       }
-
-      const payload = (await response.json()) as { notifications?: NotificationItem[] };
-      setNotifications(payload.notifications ?? []);
     };
 
     loadNotifications();
@@ -271,4 +283,3 @@ export function UserActions({ locale }: { locale: Locale }) {
     </div>
   );
 }
-
