@@ -1,27 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 :root {
-  color-scheme: light;
-  --nm-bg: #dfe2e6;
-  --nm-ink: #111a1e;
-  --nm-soft-ink: #3d4b52;
-  --nm-line: rgba(32, 45, 52, 0.12);
-  --nm-primary: #527358;
-  --nm-primary-strong: #34513b;
-  --nm-card: #ffffff;
-  --nm-muted: #edf1f4;
-  --nm-shadow: 0 24px 48px rgba(17, 26, 30, 0.12);
+  color-scheme: dark;
+  --nm-bg: #070B14;
+  --nm-ink: #e8edf5;
+  --nm-soft-ink: rgba(255, 255, 255, 0.5);
+  --nm-line: rgba(255, 255, 255, 0.08);
+  --nm-primary: #d4af37;
+  --nm-primary-strong: #c49e2e;
+  --nm-card: #0D1220;
+  --nm-card-elevated: #131d2e;
+  --nm-muted: rgba(255, 255, 255, 0.05);
+  --nm-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
   --nm-radius: 0.625rem;
   --nm-transition: 0.2s ease;
-  --nm-focus: rgba(82, 115, 88, 0.45);
-  --nm-success: #16a34a;
-  --nm-success-bg: rgba(22, 163, 74, 0.1);
-  --nm-danger: #dc2626;
-  --nm-danger-bg: rgba(220, 38, 38, 0.1);
-  --nm-warning: #d97706;
-  --nm-warning-bg: rgba(217, 119, 6, 0.1);
-  --nm-info: #2563eb;
-  --nm-info-bg: rgba(37, 99, 235, 0.1);
+  --nm-focus: rgba(212, 175, 55, 0.4);
+  --nm-success: #4ade80;
+  --nm-success-bg: rgba(74, 222, 128, 0.1);
+  --nm-danger: #f87171;
+  --nm-danger-bg: rgba(248, 113, 113, 0.1);
+  --nm-warning: #fbbf24;
+  --nm-warning-bg: rgba(251, 191, 36, 0.1);
+  --nm-info: #60a5fa;
+  --nm-info-bg: rgba(96, 165, 250, 0.1);
 }
 
 * {
@@ -31,8 +32,8 @@
 /* ── Scrollbar (from project) ───────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(17, 26, 30, 0.14); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(17, 26, 30, 0.28); }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -47,10 +48,7 @@ body {
   overflow-x: hidden;
   font-family: Inter, Montserrat, 'Segoe UI', sans-serif;
   color: var(--nm-ink);
-  background:
-    radial-gradient(circle at 8% 10%, rgba(255, 255, 255, 0.8), transparent 36%),
-    radial-gradient(circle at 92% 12%, rgba(255, 255, 255, 0.5), transparent 40%),
-    linear-gradient(180deg, #cfd5db 0%, #dde2e6 48%, #d3d8dd 100%);
+  background: var(--nm-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -312,7 +310,7 @@ button:focus-visible {
   height: 7px;
   border-radius: 50%;
   background: #4ade80;
-  border: 1.5px solid #111a1e;
+  border: 1.5px solid var(--nm-bg);
 }
 
 .nm-auth-link-btn {
@@ -370,7 +368,7 @@ button:focus-visible {
   font-weight: 700;
   color: #ffffff;
   background: #ff5a6f;
-  border: 1px solid #111a1e;
+  border: 1px solid var(--nm-bg);
   line-height: 1;
 }
 
@@ -553,23 +551,24 @@ button:focus-visible {
 
 .nm-btn-primary {
   background: var(--nm-primary);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(82, 115, 88, 0.25);
+  color: #000000;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
 }
 
 .nm-btn-primary:hover {
   background: var(--nm-primary-strong);
-  box-shadow: 0 6px 20px rgba(52, 81, 59, 0.35);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
 }
 
 .nm-btn-secondary {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
   border-color: var(--nm-line);
+  color: var(--nm-ink);
 }
 
 .nm-btn-secondary:hover {
-  border-color: var(--nm-soft-ink);
-  background: var(--nm-muted);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nm-card-grid,
@@ -610,8 +609,8 @@ button:focus-visible {
 .nm-panel:hover,
 .nm-process-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(17, 26, 30, 0.12);
-  border-color: rgba(82, 115, 88, 0.25);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  border-color: rgba(212, 175, 55, 0.2);
 }
 
 .nm-panel h3,
@@ -634,8 +633,8 @@ button:focus-visible {
 .nm-process {
   padding: clamp(14px, 2.5vw, 24px);
   border-radius: clamp(14px, 3vw, 24px);
-  background: linear-gradient(180deg, #f4f7fa 0%, #ecf0f3 100%);
-  border: 1px solid rgba(32, 45, 52, 0.08);
+  background: linear-gradient(180deg, #0f1a2a 0%, #0c1522 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .nm-story-wrap {
@@ -645,7 +644,7 @@ button:focus-visible {
 }
 
 .nm-story {
-  background: #ffffff;
+  background: var(--nm-card);
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid var(--nm-line);
@@ -654,7 +653,7 @@ button:focus-visible {
 
 .nm-story:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 36px rgba(17, 26, 30, 0.12);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.3);
 }
 
 .nm-story-image {
@@ -673,7 +672,7 @@ button:focus-visible {
   border-radius: 24px;
   overflow: hidden;
   border: 1px solid var(--nm-line);
-  background: #ffffff;
+  background: var(--nm-card);
 }
 
 .nm-team-image {
@@ -701,7 +700,7 @@ button:focus-visible {
 .nm-admin-sidebar,
 .nm-admin-content,
 .nm-admin-card {
-  background: #ffffff;
+  background: var(--nm-card);
   border: 1px solid var(--nm-line);
   border-radius: 16px;
 }
@@ -730,13 +729,13 @@ button:focus-visible {
   display: inline-flex;
   padding: 10px 12px;
   border-radius: 10px;
-  background: var(--nm-muted);
-  color: #4d5c64;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .nm-admin-tabs .active {
-  background: #dce8df;
-  color: #1d3528;
+  background: rgba(212, 175, 55, 0.15);
+  color: #d4af37;
   font-weight: 600;
 }
 
@@ -782,7 +781,7 @@ button:focus-visible {
 
 .nm-admin-field span {
   font-size: 0.88rem;
-  color: #31424a;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 600;
 }
 
@@ -796,6 +795,8 @@ button:focus-visible {
   font: inherit;
   box-sizing: border-box;
   min-width: 0;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--nm-ink);
 }
 
 .nm-admin-divider {
@@ -811,7 +812,7 @@ button:focus-visible {
   align-items: flex-end;
   margin-bottom: 10px;
   padding: 10px;
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 10px;
 }
 
@@ -821,7 +822,7 @@ button:focus-visible {
   gap: 10px;
   align-items: flex-end;
   padding: 10px;
-  background: rgba(0, 0, 0, 0.03);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 10px;
   border: 1px dashed var(--nm-line);
 }
@@ -832,11 +833,13 @@ button:focus-visible {
   border-radius: 10px;
   padding: 10px 11px;
   font: inherit;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--nm-ink);
 }
 
 .nm-admin-hint {
   font-size: 0.78rem;
-  color: #888;
+  color: rgba(255, 255, 255, 0.35);
   margin-top: 4px;
   overflow-wrap: break-word;
   word-break: break-all;
@@ -860,7 +863,7 @@ button:focus-visible {
   padding: 8px 14px;
   border: none;
   background: transparent;
-  color: #888;
+  color: rgba(255, 255, 255, 0.4);
   font-size: 0.88rem;
   font-family: inherit;
   cursor: pointer;
@@ -871,12 +874,12 @@ button:focus-visible {
 }
 
 .nm-admin-tab:hover:not(:disabled) {
-  color: #31424a;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .nm-admin-tab.active {
-  color: #111a1e;
-  border-bottom-color: #0a5c4d;
+  color: #d4af37;
+  border-bottom-color: #d4af37;
 }
 
 .nm-admin-tab:disabled {
@@ -891,6 +894,8 @@ button:focus-visible {
   border-radius: 10px;
   padding: 10px 11px;
   font: inherit;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--nm-ink);
 }
 
 .nm-admin-input-file {
@@ -898,25 +903,25 @@ button:focus-visible {
 }
 
 .nm-btn-danger {
-  background: #dc2626;
-  border-color: #dc2626;
-  color: #ffffff;
+  background: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #f87171;
 }
 
 .nm-btn-danger:hover {
-  background: #b91c1c;
-  border-color: #b91c1c;
+  background: rgba(248, 113, 113, 0.25);
+  border-color: rgba(248, 113, 113, 0.5);
 }
 
 .nm-btn-success {
-  background: #16a34a;
-  border-color: #16a34a;
-  color: #ffffff;
+  background: rgba(74, 222, 128, 0.15);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: #4ade80;
 }
 
 .nm-btn-success:hover {
-  background: #15803d;
-  border-color: #15803d;
+  background: rgba(74, 222, 128, 0.25);
+  border-color: rgba(74, 222, 128, 0.5);
 }
 
 .nm-register-page {
@@ -936,7 +941,7 @@ button:focus-visible {
 }
 
 .nm-cabinet-nav {
-  background: #ffffff;
+  background: var(--nm-card);
   border: 1px solid var(--nm-line);
   border-radius: 16px;
   padding: 16px;
@@ -967,9 +972,9 @@ button:focus-visible {
 }
 
 .nm-cabinet-nav-btn {
-  border: 1px solid #b4bdc4;
-  background: #d2d8de;
-  color: #34414a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.6);
   font: inherit;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -981,13 +986,13 @@ button:focus-visible {
 }
 
 .nm-cabinet-nav-btn:hover {
-  background: #c3ccd4;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nm-cabinet-nav-btn.active {
-  border-color: #64b4cb;
-  background: #6fb5cc;
-  color: #103743;
+  border-color: rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.15);
+  color: #d4af37;
   font-weight: 700;
 }
 
@@ -1005,7 +1010,7 @@ button:focus-visible {
 .nm-cabinet-list-item {
   border: 1px solid var(--nm-line);
   border-radius: 12px;
-  background: #f6f8fb;
+  background: rgba(255, 255, 255, 0.03);
   padding: 11px;
   display: grid;
   gap: 4px;
@@ -1021,12 +1026,12 @@ button:focus-visible {
 }
 
 .nm-cabinet-list-item-unread {
-  border-color: #70b2ca;
-  background: #eaf5f9;
+  border-color: rgba(212, 175, 55, 0.4);
+  background: rgba(212, 175, 55, 0.08);
 }
 
 .nm-register-card {
-  background: #ffffff;
+  background: var(--nm-card);
   border: 1px solid var(--nm-line);
   border-radius: clamp(12px, 2vw, 16px);
   padding: clamp(12px, 2vw, 18px);
@@ -1080,7 +1085,7 @@ button:focus-visible {
 
 .nm-partner-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(17, 26, 30, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .nm-partner-card h3 {
@@ -1092,7 +1097,7 @@ button:focus-visible {
 }
 
 .nm-partner-card a {
-  color: #20486f;
+  color: #d4af37;
   text-decoration: underline;
 }
 
@@ -1109,7 +1114,7 @@ button:focus-visible {
 
 .nm-admin-status {
   margin: 12px 0 0;
-  color: #1f5c3c;
+  color: #4ade80;
   font-weight: 600;
 }
 
@@ -1144,7 +1149,7 @@ button:focus-visible {
   object-fit: cover;
   border-radius: 16px;
   border: 1px solid var(--nm-line);
-  background: #f4f6f8;
+  background: rgba(255, 255, 255, 0.03);
   margin-bottom: 10px;
 }
 
@@ -1157,15 +1162,15 @@ button:focus-visible {
 .nm-market-card {
   border: 1px solid var(--nm-line);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--nm-card);
   padding: 12px;
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .nm-market-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(17, 26, 30, 0.1);
-  border-color: rgba(82, 115, 88, 0.2);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+  border-color: rgba(212, 175, 55, 0.2);
 }
 
 .nm-market-card-head {
@@ -1185,7 +1190,7 @@ button:focus-visible {
 
 .nm-market-price {
   white-space: nowrap;
-  color: #2f5d46;
+  color: #d4af37;
 }
 
 .nm-market-subtle {
@@ -1208,7 +1213,7 @@ button:focus-visible {
 
 .nm-service-switch {
   margin-bottom: 12px;
-  border: 2px solid #1f9fbc;
+  border: 2px solid rgba(212, 175, 55, 0.4);
   border-radius: 20px;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1217,8 +1222,8 @@ button:focus-visible {
 
 .nm-service-switch-btn {
   border: none;
-  background: #ffffff;
-  color: #1d2a31;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
   font: inherit;
   font-weight: 600;
   padding: 10px 12px;
@@ -1226,8 +1231,8 @@ button:focus-visible {
 }
 
 .nm-service-switch-btn.active {
-  background: #8ec5d6;
-  color: #173e4a;
+  background: rgba(212, 175, 55, 0.2);
+  color: #d4af37;
 }
 
 .nm-market-image {
@@ -1236,14 +1241,14 @@ button:focus-visible {
   object-fit: cover;
   border-radius: 10px;
   border: 1px solid var(--nm-line);
-  background: #f4f6f8;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .nm-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(11, 20, 24, 0.55);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
   z-index: 400;
   display: grid;
   place-items: center;
@@ -1255,11 +1260,11 @@ button:focus-visible {
   width: min(640px, calc(100% - 16px));
   max-height: calc(100vh - 32px);
   overflow: auto;
-  background: #ffffff;
-  border: 1px solid var(--nm-line);
+  background: var(--nm-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: clamp(12px, 2vw, 16px);
   padding: clamp(12px, 2vw, 16px);
-  box-shadow: 0 32px 64px rgba(17, 26, 30, 0.2);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
   animation: nmSlideUp 300ms ease;
 }
 
@@ -1283,7 +1288,7 @@ button:focus-visible {
   border: 1px solid var(--nm-line);
   border-radius: 12px;
   padding: 12px;
-  background: #ffffff;
+  background: var(--nm-card);
 }
 
 .nm-messages-sidebar h3,
@@ -1300,7 +1305,7 @@ button:focus-visible {
 .nm-messages-user {
   border: 1px solid var(--nm-line);
   border-radius: 10px;
-  background: #f7f9fb;
+  background: rgba(255, 255, 255, 0.03);
   text-align: left;
   padding: 10px;
   display: grid;
@@ -1310,8 +1315,8 @@ button:focus-visible {
 }
 
 .nm-messages-user.active {
-  border-color: #9bb2a0;
-  background: #edf4ef;
+  border-color: rgba(212, 175, 55, 0.4);
+  background: rgba(212, 175, 55, 0.08);
 }
 
 .nm-messages-user span,
@@ -1340,7 +1345,7 @@ button:focus-visible {
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid var(--nm-line);
-  background: #f4f6f8;
+  background: rgba(255, 255, 255, 0.03);
   flex-shrink: 0;
 }
 
@@ -1348,10 +1353,10 @@ button:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #4a7c67;
+  color: #d4af37;
   font-size: 0.85rem;
   font-weight: 700;
-  background: #e8f4ef;
+  background: rgba(212, 175, 55, 0.12);
 }
 
 .nm-messages-contact-text {
@@ -1387,13 +1392,13 @@ button:focus-visible {
   border: 1px solid var(--nm-line);
   border-radius: 12px;
   padding: 10px;
-  background: #f6f9fc;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .nm-bubble-own {
   justify-self: end;
-  background: #dce8df;
-  border-color: #a6bfae;
+  background: rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.2);
 }
 
 .nm-bubble p,
@@ -2238,7 +2243,7 @@ button:focus-visible {
 .nm-catalog-filters {
   margin-top: 12px;
   padding: 14px;
-  background: var(--nm-muted);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--nm-line);
   border-radius: 10px;
   display: grid;
@@ -2253,8 +2258,8 @@ button:focus-visible {
 }
 
 .nm-btn-active {
-  background: #e8f0eb;
-  border-color: #9bb2a0;
+  background: rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.3);
 }
 
 /* ── Vertical user list ─────────────────────────────────────────── */
@@ -2272,7 +2277,7 @@ button:focus-visible {
   border: 1px solid var(--nm-line);
   border-radius: 12px;
   padding: 12px;
-  background: #ffffff;
+  background: var(--nm-card);
 }
 
 .nm-user-list-avatar-wrap {
@@ -2286,7 +2291,7 @@ button:focus-visible {
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid var(--nm-line);
-  background: #f4f6f8;
+  background: rgba(255, 255, 255, 0.03);
   display: block;
 }
 
@@ -2298,8 +2303,8 @@ button:focus-visible {
   height: 56px;
   border-radius: 50%;
   border: 1px solid var(--nm-line);
-  background: #e8f4ef;
-  color: #4a7c67;
+  background: rgba(212, 175, 55, 0.12);
+  color: #d4af37;
   font-size: 1.3rem;
   font-weight: 700;
 }
@@ -2321,15 +2326,15 @@ button:focus-visible {
 
 .nm-user-list-name:hover {
   text-decoration: underline;
-  color: #20486f;
+  color: #d4af37;
 }
 
 .nm-user-list-role {
   font-size: 0.78rem;
   padding: 2px 8px;
   border-radius: 20px;
-  background: #e8f4ef;
-  color: #3a6a52;
+  background: rgba(212, 175, 55, 0.12);
+  color: #d4af37;
   display: inline-block;
   width: fit-content;
 }
@@ -2364,8 +2369,8 @@ button:focus-visible {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 20px;
-  background: #e8f4ef;
-  color: #3a6a52;
+  background: rgba(212, 175, 55, 0.12);
+  color: #d4af37;
   font-size: 0.8rem;
   margin: 4px 0;
 }
@@ -2384,9 +2389,9 @@ button:focus-visible {
   min-height: 72vh;
   border-radius: clamp(12px, 2vw, 20px);
   overflow: hidden;
-  background: linear-gradient(130deg, #f6f7fb 0%, #ffffff 100%);
-  border: 1px solid #d6dce6;
-  box-shadow: 0 24px 48px rgba(19, 35, 65, 0.14);
+  background: var(--nm-card);
+  border: 1px solid var(--nm-line);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
 }
 
 .nm-chat-sidebar {
@@ -2523,7 +2528,7 @@ button:focus-visible {
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid rgba(255, 255, 255, 0.28);
-  background: #f4f6f8;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .nm-chat-dialog-avatar-placeholder {
@@ -2617,7 +2622,7 @@ button:focus-visible {
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid rgba(255, 255, 255, 0.24);
-  background: #f4f6f8;
+  background: rgba(255, 255, 255, 0.03);
   flex-shrink: 0;
 }
 
@@ -2641,11 +2646,11 @@ button:focus-visible {
   display: grid;
   grid-template-rows: auto 1fr auto;
   min-height: 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f7f9fe 100%);
+  background: linear-gradient(180deg, var(--nm-card) 0%, #0a1019 100%);
 }
 
 .nm-chat-thread-head {
-  border-bottom: 1px solid #dde3ee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 14px 18px;
 }
 
@@ -2656,10 +2661,10 @@ button:focus-visible {
 }
 
 .nm-chat-back-btn {
-  border: 1px solid #c8d4e8;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 999px;
-  background: #f1f5fe;
-  color: #324d7d;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
   padding: 6px 10px;
   font: inherit;
   font-size: 0.8rem;
@@ -2667,7 +2672,7 @@ button:focus-visible {
 }
 
 .nm-chat-back-btn:hover {
-  background: #e7eefc;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .nm-chat-thread-user h3 {
@@ -2675,7 +2680,7 @@ button:focus-visible {
 }
 
 .nm-chat-thread-user small {
-  color: #70809e;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .nm-messages-bubbles {
@@ -2691,15 +2696,15 @@ button:focus-visible {
   max-width: min(78%, 620px);
   border-radius: 12px 12px 12px 4px;
   padding: 10px 12px;
-  background: #f1f4fb;
-  border: 1px solid #dbe2ee;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nm-bubble-own {
   justify-self: end;
-  background: #4f6cb0;
-  color: #f6f8ff;
-  border-color: #3f5e9e;
+  background: rgba(212, 175, 55, 0.15);
+  color: #e8edf5;
+  border-color: rgba(212, 175, 55, 0.25);
   border-radius: 12px 12px 4px 12px;
 }
 
@@ -2711,16 +2716,16 @@ button:focus-visible {
 .nm-bubble small {
   display: block;
   margin-top: 6px;
-  color: #6e7b95;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .nm-bubble-own small {
-  color: #d7e0ff;
+  color: rgba(212, 175, 55, 0.6);
 }
 
 .nm-chat-compose-wrap {
-  border-top: 1px solid #dde3ee;
-  background: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--nm-card);
   padding: 10px 14px 14px;
 }
 
@@ -2729,27 +2734,27 @@ button:focus-visible {
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 0.82rem;
-  background: #f0f5ff;
-  border: 1px solid #c7d4f0;
-  color: #3a4c70;
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  color: #60a5fa;
 }
 
 .nm-ref-tag-product {
-  background: #f0faf2;
-  border-color: #a6d4b4;
-  color: #2e5c3a;
+  background: rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
 }
 
 .nm-ref-tag-ad {
-  background: #fdf4e8;
-  border-color: #e8c97a;
-  color: #5c4010;
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
 }
 
 .nm-chat-compose-actions {
   display: flex;
   gap: 10px;
-  color: #7d89a5;
+  color: rgba(255, 255, 255, 0.35);
   margin: 2px 0 8px;
 }
 
@@ -2769,8 +2774,8 @@ button:focus-visible {
   border: 0;
   border-radius: 10px;
   padding: 10px 16px;
-  background: linear-gradient(135deg, #4f6cb0 0%, #6887cf 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, #d4af37 0%, #c49e2e 100%);
+  color: #000000;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -2794,7 +2799,7 @@ button:focus-visible {
   height: 36px;
   border: 1px solid var(--nm-line);
   border-radius: 10px;
-  background: #f6f8fb;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--nm-ink);
   font: inherit;
   font-size: 1rem;
@@ -2805,7 +2810,7 @@ button:focus-visible {
 }
 
 .nm-icon-btn:hover {
-  background: #eaf0f7;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nm-reason-grid {
@@ -3041,7 +3046,7 @@ button:focus-visible {
 }
 
 .nm-admin-subtab.active {
-  color: #fff;
+  color: #000;
   background: var(--nm-primary);
   border-color: var(--nm-primary);
   font-weight: 600;
@@ -3104,7 +3109,7 @@ button:focus-visible {
 }
 
 .nm-role-row-dirty {
-  background: rgba(90, 200, 140, 0.05) !important;
+  background: rgba(212, 175, 55, 0.08) !important;
 }
 
 .nm-role-cell-name {
@@ -3120,7 +3125,7 @@ button:focus-visible {
   height: 30px;
   border-radius: 50%;
   background: var(--nm-primary);
-  color: #fff;
+  color: #000;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3158,7 +3163,7 @@ button:focus-visible {
 }
 
 .nm-role-saved {
-  color: #2ecc71;
+  color: #4ade80;
   font-size: 0.82rem;
   font-weight: 600;
 }
@@ -3169,14 +3174,14 @@ button:focus-visible {
 }
 .nm-card-interactive:hover {
   transform: scale(1.03);
-  box-shadow: 0 12px 32px rgba(17, 26, 30, 0.12);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* Info modal */
 .nm-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3184,7 +3189,8 @@ button:focus-visible {
   padding: clamp(0.5rem, 2vw, 1rem);
 }
 .nm-modal-content {
-  background: var(--nm-card, #fff);
+  background: var(--nm-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: clamp(12px, 2vw, 16px);
   padding: clamp(1rem, 3vw, 2rem);
   max-width: min(640px, calc(100vw - 24px));
@@ -3192,7 +3198,7 @@ button:focus-visible {
   max-height: 80vh;
   overflow-y: auto;
   position: relative;
-  color: var(--nm-ink, #111);
+  color: var(--nm-ink);
 }
 .nm-modal-content h2 {
   margin: 0 0 1rem;
