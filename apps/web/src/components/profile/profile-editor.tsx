@@ -34,7 +34,7 @@ type ProfileFormState = {
   aboutMe: string;
 };
 
-type CabinetSection = 'main' | 'messages' | 'notifications' | 'wallet' | 'products' | 'services';
+type CabinetSection = 'main' | 'messages' | 'notifications' | 'wallet' | 'products' | 'services' | 'settings';
 
 type NotificationItem = {
   id: string;
@@ -126,6 +126,13 @@ function textByLocale(locale: Locale) {
       markAllRead: 'Mark all read',
       read: 'Read',
       providerOnlyBlock: 'This section is available only for users with Provider role.',
+      navSettings: 'Settings',
+      sectionSettingsTitle: 'Site settings',
+      sectionSettingsHint: 'Notification preferences and appearance.',
+      settingsNotifications: 'Allow notifications',
+      settingsTheme: 'Dark theme',
+      settingsThemeDark: 'Dark',
+      settingsThemeLight: 'Light',
     };
   }
 
@@ -175,6 +182,13 @@ function textByLocale(locale: Locale) {
       markAllRead: 'Позначити все прочитаним',
       read: 'Прочитати',
       providerOnlyBlock: 'Розділ доступний лише користувачам з роллю Постачальник.',
+      navSettings: 'Налаштування',
+      sectionSettingsTitle: 'Налаштування сайту',
+      sectionSettingsHint: 'Сповіщення та зовнішній вигляд.',
+      settingsNotifications: 'Дозволити сповіщення',
+      settingsTheme: 'Темна тема',
+      settingsThemeDark: 'Темна',
+      settingsThemeLight: 'Світла',
     };
   }
 
@@ -223,6 +237,13 @@ function textByLocale(locale: Locale) {
     markAllRead: 'Прочитать все',
     read: 'Прочитать',
     providerOnlyBlock: 'Раздел доступен только пользователям с ролью Поставщик.',
+    navSettings: 'Настройки',
+    sectionSettingsTitle: 'Настройки сайта',
+    sectionSettingsHint: 'Уведомления и внешний вид.',
+    settingsNotifications: 'Разрешить уведомления',
+    settingsTheme: 'Тёмная тема',
+    settingsThemeDark: 'Тёмная',
+    settingsThemeLight: 'Светлая',
   };
 }
 
@@ -254,8 +275,40 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
   const [isActive, setIsActive] = useState(true);
   const [balancePai, setBalancePai] = useState<number>(0);
   const [activationThreshold, setActivationThreshold] = useState(200);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [darkTheme, setDarkTheme] = useState(true);
 
   const signOutLabel = locale === 'en' ? 'Sign out' : locale === 'uk' ? 'Вийти' : 'Выйти';
+
+  // Restore settings from localStorage
+  useEffect(() => {
+    const storedNotif = localStorage.getItem('nm-notifications-enabled');
+    if (storedNotif !== null) setNotificationsEnabled(storedNotif === '1');
+    const storedTheme = localStorage.getItem('nm-dark-theme');
+    if (storedTheme !== null) setDarkTheme(storedTheme !== '0');
+    if (storedTheme === '0') document.documentElement.classList.add('nm-light');
+  }, []);
+
+  const toggleNotifications = () => {
+    setNotificationsEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem('nm-notifications-enabled', next ? '1' : '0');
+      return next;
+    });
+  };
+
+  const toggleTheme = () => {
+    setDarkTheme((prev) => {
+      const next = !prev;
+      localStorage.setItem('nm-dark-theme', next ? '1' : '0');
+      if (next) {
+        document.documentElement.classList.remove('nm-light');
+      } else {
+        document.documentElement.classList.add('nm-light');
+      }
+      return next;
+    });
+  };
 
   const loadProfile = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
@@ -553,6 +606,7 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
             <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'wallet' ? ' active' : ''}`} onClick={() => setActiveSection('wallet')}>{t.navWallet}</button>
             <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'products' ? ' active' : ''}`} onClick={() => setActiveSection('products')}>{t.navProducts}</button>
             <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'services' ? ' active' : ''}`} onClick={() => setActiveSection('services')}>{t.navServices}</button>
+            <button type="button" className={`nm-cabinet-nav-btn${activeSection === 'settings' ? ' active' : ''}`} onClick={() => setActiveSection('settings')}>{t.navSettings}</button>
           </div>
 
           <button type="button" className="nm-btn nm-btn-secondary" onClick={signOut}>
@@ -800,6 +854,40 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
                   <p>{t.providerOnlyBlock}</p>
                 </div>
               )}
+            </section>
+          ) : null}
+
+          {activeSection === 'settings' ? (
+            <section className="nm-register-card">
+              <h1>{t.sectionSettingsTitle}</h1>
+              <p>{t.sectionSettingsHint}</p>
+
+              <div className="nm-settings-list">
+                <div className="nm-settings-row">
+                  <span className="nm-settings-label">{t.settingsNotifications}</span>
+                  <label className="nm-toggle">
+                    <input type="checkbox" checked={notificationsEnabled} onChange={toggleNotifications} />
+                    <span className="nm-toggle-track">
+                      <span className="nm-toggle-thumb" />
+                    </span>
+                  </label>
+                </div>
+
+                <div className="nm-settings-row">
+                  <div className="nm-settings-label-group">
+                    <span className="nm-settings-label">{t.settingsTheme}</span>
+                    <small className="nm-settings-hint">{darkTheme ? t.settingsThemeDark : t.settingsThemeLight}</small>
+                  </div>
+                  <label className="nm-toggle nm-toggle-theme">
+                    <input type="checkbox" checked={darkTheme} onChange={toggleTheme} />
+                    <span className="nm-toggle-track">
+                      <span className="nm-toggle-icon nm-toggle-icon-sun">☀️</span>
+                      <span className="nm-toggle-icon nm-toggle-icon-moon">🌙</span>
+                      <span className="nm-toggle-thumb" />
+                    </span>
+                  </label>
+                </div>
+              </div>
             </section>
           ) : null}
 
