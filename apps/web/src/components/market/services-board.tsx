@@ -182,6 +182,7 @@ export function ServicesBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
   const [viewerId, setViewerId] = useState<string>('');
   const [role, setRole] = useState<ViewerRole>('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -243,8 +244,9 @@ export function ServicesBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
     });
 
     if (profileResponse.ok) {
-      const payload = (await profileResponse.json()) as { profile?: { role?: ViewerRole } };
+      const payload = (await profileResponse.json()) as { profile?: { role?: ViewerRole; isActive?: boolean } };
       setRole(payload.profile?.role ?? '');
+      setIsActive(Boolean(payload.profile?.isActive));
     }
 
     const adminResponse = await fetch('/api/profile/me', {
@@ -272,6 +274,11 @@ export function ServicesBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
   const openModal = () => {
     if (!token) {
       setStatus(t.loginRequired);
+      return;
+    }
+
+    if (!isActive) {
+      setStatus(locale === 'en' ? 'Activate your account to post ads.' : locale === 'uk' ? 'Активуйте акаунт, щоб розміщувати оголошення.' : 'Активируйте аккаунт, чтобы размещать объявления.');
       return;
     }
 

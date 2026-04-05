@@ -9,6 +9,8 @@ type Viewer = {
   isEmailVerified: boolean;
 };
 
+type ActiveViewer = Viewer & { isActive: true };
+
 function readBearerToken(request: Request) {
   const header = request.headers.get('authorization');
   if (!header || !header.toLowerCase().startsWith('bearer ')) {
@@ -55,4 +57,33 @@ export async function requireMainAdmin(request: Request) {
 export async function isMainAdminUser(userId: string): Promise<boolean> {
   const profile = await getProfileByUserId(userId);
   return profile?.role === 'main_admin';
+}
+
+/**
+ * Середній рівень авторизації: перевіряє Bearer-токен + is_active у app_users.
+ * Повертає NextResponse з 401/403 при помилці або { viewer } при успіху.
+ */
+export async function requireActiveUser(
+  request: Request,
+): Promise<NextResponse | { viewer: ActiveViewer }> {
+  const viewer = await getViewerFromRequest(request);
+  if (!viewer) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const supabase = getSupabaseServiceClient() as ReturnType<typeof getSupabaseServiceClient>;
+  const { data } = await (supabase as any)
+    .from('app_users')
+    .select('is_active')
+    .eq('id', viewer.userId)
+    .maybeSingle();
+
+  if (!data || !data.is_active) {
+    return NextResponse.json(
+      { error: 'account_inactive', message: 'Activate your account to use this feature' },
+      { status: 403 },
+    );
+  }
+
+  return { viewer: { ...viewer, isActive: true } };
 }

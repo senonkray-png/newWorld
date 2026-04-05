@@ -120,6 +120,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
   const [token, setToken] = useState('');
   const [viewerId, setViewerId] = useState('');
   const [status, setStatus] = useState('');
+  const [isActive, setIsActive] = useState(true);
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [contacts, setContacts] = useState<ContactItem[]>([]);
   const [search, setSearch] = useState('');
@@ -302,6 +303,26 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
         return;
       }
 
+      /* Check activation status */
+      const profileRes = await fetch('/api/app-profile/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (profileRes.ok) {
+        const pp = (await profileRes.json()) as { profile?: { isActive?: boolean } };
+        const active = Boolean(pp.profile?.isActive);
+        setIsActive(active);
+        if (!active) {
+          setStatus(
+            locale === 'en'
+              ? 'Activate your account to use messages.'
+              : locale === 'uk'
+                ? 'Активуйте акаунт, щоб користуватися повідомленнями.'
+                : 'Активируйте аккаунт, чтобы пользоваться сообщениями.',
+          );
+          return;
+        }
+      }
+
       await Promise.all([loadConversations(accessToken), loadContacts(accessToken, '', roleFilter)]);
     }
 
@@ -324,7 +345,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
       alive = false;
       listener.subscription.unsubscribe();
     };
-  }, [loadContacts, loadConversations, search, roleFilter, supabase.auth]);
+  }, [loadContacts, loadConversations, search, roleFilter, supabase.auth, locale]);
 
   useEffect(() => {
     if (!token || !selectedId) {
@@ -397,7 +418,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
   };
 
   const onSend = async () => {
-    if (!token || !selectedId || !draft.trim()) {
+    if (!token || !selectedId || !draft.trim() || !isActive) {
       return;
     }
 

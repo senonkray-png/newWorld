@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getViewerFromRequest } from '@/lib/auth-server';
+import { getViewerFromRequest, requireActiveUser } from '@/lib/auth-server';
 import { getMessageThread, listMessageConversations, sendMessage } from '@/lib/message-store';
 
 function mapApiError(error: unknown) {
@@ -17,10 +17,9 @@ function mapApiError(error: unknown) {
 
 export async function GET(request: Request) {
   try {
-    const viewer = await getViewerFromRequest(request);
-    if (!viewer) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const result = await requireActiveUser(request);
+    if (result instanceof NextResponse) return result;
+    const { viewer } = result;
 
     const url = new URL(request.url);
     const counterpartId = (url.searchParams.get('with') ?? '').trim();
@@ -39,10 +38,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const viewer = await getViewerFromRequest(request);
-    if (!viewer) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const result = await requireActiveUser(request);
+    if (result instanceof NextResponse) return result;
+    const { viewer } = result;
 
     const payload = (await request.json()) as {
       to?: string;

@@ -11,6 +11,7 @@ export type AppUserProfile = {
   memberId: number;
   email: string;
   isEmailVerified: boolean;
+  isActive: boolean;
   fullName: string;
   phone: string;
   gender: string;
@@ -46,6 +47,7 @@ export type AppUserDirectoryEntry = {
   memberId: number;
   email: string;
   isEmailVerified: boolean;
+  isActive: boolean;
   fullName: string;
   avatarUrl: string;
   country: string;
@@ -68,6 +70,7 @@ type RawAppUser = {
   member_id: number | null;
   email: string | null;
   is_email_verified: boolean | null;
+  is_active: boolean | null;
   full_name: string | null;
   phone: string | null;
   gender: string | null;
@@ -130,6 +133,7 @@ function mapProfile(row: RawAppUser): AppUserProfile {
     memberId: typeof row.member_id === 'number' ? row.member_id : 0,
     email: cleanText(row.email),
     isEmailVerified: Boolean(row.is_email_verified),
+    isActive: Boolean(row.is_active),
     fullName: cleanText(row.full_name),
     phone: cleanText(row.phone),
     gender: cleanText(row.gender),
@@ -158,6 +162,7 @@ function mapDirectoryEntry(row: RawAppUser): AppUserDirectoryEntry {
     memberId: profile.memberId,
     email: profile.email,
     isEmailVerified: profile.isEmailVerified,
+    isActive: profile.isActive,
     fullName: profile.fullName || profile.companyName || profile.email || 'Пользователь',
     avatarUrl: profile.avatarUrl,
     country: profile.country,

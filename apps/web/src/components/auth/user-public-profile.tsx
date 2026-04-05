@@ -34,10 +34,19 @@ export function UserPublicProfile({ locale, userId }: { locale: Locale; userId: 
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [viewerActive, setViewerActive] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setIsAuthed(Boolean(data.session?.access_token));
+      if (data.session?.access_token) {
+        fetch('/api/app-profile/me', {
+          headers: { Authorization: `Bearer ${data.session.access_token}` },
+        })
+          .then((r) => r.json())
+          .then((p: any) => setViewerActive(Boolean(p?.profile?.isActive)))
+          .catch(() => {});
+      }
     });
     const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
       setIsAuthed(Boolean(session?.access_token));
@@ -173,6 +182,16 @@ export function UserPublicProfile({ locale, userId }: { locale: Locale; userId: 
           {user.instagram ? (
             <div className="nm-profile-row">
               <strong>Instagram:</strong> {user.instagram}
+            </div>
+          ) : null}
+          {isAuthed && !viewerActive && !user.phone && !user.telegram && !user.instagram && !user.websiteUrl ? (
+            <div className="nm-profile-row" style={{ gridColumn: '1 / -1', color: '#888', fontStyle: 'italic' }}>
+              🔒{' '}
+              {locale === 'en'
+                ? 'Contact details available after account activation.'
+                : locale === 'uk'
+                  ? 'Контактні дані доступні після активації акаунту.'
+                  : 'Контактные данные доступны после активации аккаунта.'}
             </div>
           ) : null}
         </div>

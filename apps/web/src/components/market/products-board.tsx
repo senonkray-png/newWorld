@@ -175,6 +175,7 @@ export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
   const [role, setRole] = useState<ViewerRole>('');
   const [viewerId, setViewerId] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -238,8 +239,9 @@ export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
     if (!response.ok) {
       setRole('');
     } else {
-      const payload = (await response.json()) as { profile?: { role?: ViewerRole } };
+      const payload = (await response.json()) as { profile?: { role?: ViewerRole; isActive?: boolean } };
       setRole(payload.profile?.role ?? '');
+      setIsActive(Boolean(payload.profile?.isActive));
     }
 
     const adminResponse = await fetch('/api/profile/me', {
@@ -320,6 +322,11 @@ export function ProductsBoard({ locale, mode = 'catalog' }: { locale: Locale; mo
   const openModal = () => {
     if (!token) {
       setStatus(t.loginRequired);
+      return;
+    }
+
+    if (!isActive) {
+      setStatus(locale === 'en' ? 'Activate your account to publish products.' : locale === 'uk' ? 'Активуйте акаунт, щоб публікувати товари.' : 'Активируйте аккаунт, чтобы публиковать товары.');
       return;
     }
 
