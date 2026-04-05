@@ -124,6 +124,8 @@ function ImageInputField({
   );
 }
 
+type ContentSubTab = 'seo' | 'hero' | 'features' | 'process' | 'story' | 'team';
+
 export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorProps) {
   const t = useMemo(() => getAdminMessages(locale), [locale]);
   const fallback = useMemo(() => defaultHomeContent[locale], [locale]);
@@ -131,6 +133,7 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
   const [status, setStatus] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
+  const [subTab, setSubTab] = useState<ContentSubTab>('seo');
 
   const handleImageUploadGeneric = async (file: File, onSuccess: (url: string) => void) => {
     setUploadingImage(file.name);
@@ -366,6 +369,15 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
     setIsSaving(false);
   };
 
+  const subTabs: { key: ContentSubTab; label: string }[] = [
+    { key: 'seo', label: t.subSeo },
+    { key: 'hero', label: t.subHero },
+    { key: 'features', label: t.subFeatures },
+    { key: 'process', label: t.subProcess },
+    { key: 'story', label: t.subStory },
+    { key: 'team', label: t.subTeam },
+  ];
+
   return (
     <div className="nm-admin-layout">
       <aside className="nm-admin-sidebar">
@@ -386,6 +398,19 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
           <p>{t.editorDesc}</p>
         </header>
 
+        <nav className="nm-admin-subtabs">
+          {subTabs.map((st) => (
+            <button
+              key={st.key}
+              className={`nm-admin-subtab${subTab === st.key ? ' active' : ''}`}
+              onClick={() => setSubTab(st.key)}
+            >
+              {st.label}
+            </button>
+          ))}
+        </nav>
+
+        {subTab === 'seo' && (
         <div className="nm-admin-card">
           <h3>{t.seo}</h3>
           <InputField
@@ -399,7 +424,9 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
             onChange={(value) => setContent((prev) => ({ ...prev, seo: { ...prev.seo, description: value } }))}
           />
         </div>
+        )}
 
+        {subTab === 'hero' && (
         <div className="nm-admin-card">
           <h3>{t.heroBlock}</h3>
           <InputField label={t.heroHeading} value={content.heroTitle} onChange={(value) => setContent((prev) => ({ ...prev, heroTitle: value }))} />
@@ -442,7 +469,9 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
             {t.resetHeroSizes}
           </button>
         </div>
+        )}
 
+        {subTab === 'features' && (
         <div className="nm-admin-card">
           <h3>{t.featuresSection}</h3>
           <InputField label={t.sectionHeading} value={content.featureTitle} onChange={(value) => setContent((prev) => ({ ...prev, featureTitle: value }))} />
@@ -486,7 +515,9 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
             </div>
           ))}
         </div>
+        )}
 
+        {subTab === 'process' && (
         <div className="nm-admin-card">
           <h3>{t.processSection}</h3>
           <InputField label={t.sectionHeading} value={content.processTitle} onChange={(value) => setContent((prev) => ({ ...prev, processTitle: value }))} />
@@ -530,7 +561,9 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
             </div>
           ))}
         </div>
+        )}
 
+        {subTab === 'story' && (
         <div className="nm-admin-card">
           <h3>{t.storyBlocks}</h3>
           <InputField label={t.storyLeftTitle} value={content.storyLeft.title} onChange={(value) => setContent((prev) => ({ ...prev, storyLeft: { ...prev.storyLeft, title: value } }))} />
@@ -560,7 +593,9 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
             uploadingLabel={t.uploading}
           />
         </div>
+        )}
 
+        {subTab === 'team' && (
         <div className="nm-admin-card">
           <h3>{t.teamBlock}</h3>
           <InputField label={t.teamTitle} value={content.teamSection.title} onChange={(value) => setContent((prev) => ({ ...prev, teamSection: { ...prev.teamSection, title: value } }))} />
@@ -577,6 +612,7 @@ export function HomeEditor({ locale, initialContent, accessToken }: HomeEditorPr
             uploadingLabel={t.uploading}
           />
         </div>
+        )}
 
         <div className="nm-admin-actions">
           <button type="button" className="nm-btn nm-btn-primary" onClick={save} disabled={isSaving}>

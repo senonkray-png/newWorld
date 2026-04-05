@@ -14,6 +14,7 @@ import { UserRoleManager } from '@/components/admin/user-role-manager';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 type AdminTab = 'content' | 'users' | 'deposits';
+type DepositsSubTab = 'monobank' | 'manual' | 'withdrawals' | 'registry';
 
 export function AdminShell({ locale }: { locale: Locale }) {
   const t = useMemo(() => getAdminMessages(locale), [locale]);
@@ -22,6 +23,7 @@ export function AdminShell({ locale }: { locale: Locale }) {
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState<HomeContent | null>(null);
   const [tab, setTab] = useState<AdminTab>('content');
+  const [depositsSubTab, setDepositsSubTab] = useState<DepositsSubTab>('monobank');
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [canBootstrap, setCanBootstrap] = useState(false);
   const [bootstrapping, setBootstrapping] = useState(false);
@@ -174,10 +176,34 @@ export function AdminShell({ locale }: { locale: Locale }) {
 
       {tab === 'deposits' && accessToken ? (
         <section className="nm-register-card nm-admin-card-section">
-          <ProcessedPaymentsAdmin accessToken={accessToken} locale={locale} />
-          <DepositRequestsAdmin accessToken={accessToken} locale={locale} />
-          <WithdrawalRequestsAdmin accessToken={accessToken} locale={locale} />
-          <CoopRegistryExport accessToken={accessToken} locale={locale} />
+          <nav className="nm-admin-subtabs">
+            {([
+              { key: 'monobank' as DepositsSubTab, label: t.subMonobank },
+              { key: 'manual' as DepositsSubTab, label: t.subManualDeposits },
+              { key: 'withdrawals' as DepositsSubTab, label: t.subWithdrawals },
+              { key: 'registry' as DepositsSubTab, label: t.subRegistry },
+            ]).map((st) => (
+              <button
+                key={st.key}
+                className={`nm-admin-subtab${depositsSubTab === st.key ? ' active' : ''}`}
+                onClick={() => setDepositsSubTab(st.key)}
+              >
+                {st.label}
+              </button>
+            ))}
+          </nav>
+          {depositsSubTab === 'monobank' && (
+            <ProcessedPaymentsAdmin accessToken={accessToken} locale={locale} />
+          )}
+          {depositsSubTab === 'manual' && (
+            <DepositRequestsAdmin accessToken={accessToken} locale={locale} />
+          )}
+          {depositsSubTab === 'withdrawals' && (
+            <WithdrawalRequestsAdmin accessToken={accessToken} locale={locale} />
+          )}
+          {depositsSubTab === 'registry' && (
+            <CoopRegistryExport accessToken={accessToken} locale={locale} />
+          )}
         </section>
       ) : null}
 

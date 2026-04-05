@@ -15,6 +15,20 @@ const messages = {
     tabDeposits: 'ПК: взносы и реестр пайщиков',
     contentLoadError: 'Не удалось загрузить контент главной страницы.',
 
+    // content sub-tabs
+    subSeo: 'SEO',
+    subHero: 'Hero блок',
+    subFeatures: 'Возможности',
+    subProcess: 'Процесс',
+    subStory: 'Сторителлинг',
+    subTeam: 'Команда',
+
+    // deposits sub-tabs
+    subMonobank: 'Monobank',
+    subManualDeposits: 'Ручные взносы',
+    subWithdrawals: 'Возвраты',
+    subRegistry: 'Реестр',
+
     // home-editor
     linkMode: 'Ссылка',
     uploadMode: 'Загрузить',
@@ -183,6 +197,18 @@ const messages = {
     tabDeposits: 'ПК: внески та реєстр пайщиків',
     contentLoadError: 'Не вдалося завантажити контент головної сторінки.',
 
+    subSeo: 'SEO',
+    subHero: 'Hero блок',
+    subFeatures: 'Можливості',
+    subProcess: 'Процес',
+    subStory: 'Сторітелінг',
+    subTeam: 'Команда',
+
+    subMonobank: 'Monobank',
+    subManualDeposits: 'Ручні внески',
+    subWithdrawals: 'Повернення',
+    subRegistry: 'Реєстр',
+
     linkMode: 'Посилання',
     uploadMode: 'Завантажити',
     currentImage: 'Поточне зображення',
@@ -343,6 +369,18 @@ const messages = {
     tabUsers: 'Users',
     tabDeposits: 'Coop: deposits & registry',
     contentLoadError: 'Failed to load home page content.',
+
+    subSeo: 'SEO',
+    subHero: 'Hero block',
+    subFeatures: 'Features',
+    subProcess: 'Process',
+    subStory: 'Storytelling',
+    subTeam: 'Team',
+
+    subMonobank: 'Monobank',
+    subManualDeposits: 'Manual deposits',
+    subWithdrawals: 'Withdrawals',
+    subRegistry: 'Registry',
 
     linkMode: 'Link',
     uploadMode: 'Upload',

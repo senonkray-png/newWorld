@@ -2752,6 +2752,40 @@ a {
   font-weight: 600;
 }
 
+/* Sub-tabs (secondary navigation within a main tab) */
+.nm-admin-subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 auto 20px;
+  max-width: 900px;
+  padding: 0 16px;
+}
+
+.nm-admin-subtab {
+  padding: 6px 14px;
+  border: 1px solid var(--nm-line);
+  border-radius: 18px;
+  background: transparent;
+  color: var(--nm-soft-ink);
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.nm-admin-subtab:hover {
+  color: var(--nm-ink);
+  border-color: var(--nm-ink);
+}
+
+.nm-admin-subtab.active {
+  color: #fff;
+  background: var(--nm-primary);
+  border-color: var(--nm-primary);
+  font-weight: 600;
+}
+
 .nm-admin-section-title {
   font-size: 1.15rem;
   font-weight: 700;
