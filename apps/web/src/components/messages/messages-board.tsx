@@ -58,8 +58,10 @@ function textByLocale(locale: Locale) {
       me: 'You',
       recording: 'Recording…',
       online: 'online',
+      wasRecently: 'was recently',
       attachFile: 'Attach file',
       voiceMessage: 'Voice message',
+      search: 'Search',
     };
   }
 
@@ -83,8 +85,10 @@ function textByLocale(locale: Locale) {
       me: 'Ви',
       recording: 'Запис…',
       online: 'в мережі',
+      wasRecently: 'був(ла) нещодавно',
       attachFile: 'Прикріпити файл',
       voiceMessage: 'Голосове повідомлення',
+      search: 'Пошук',
     };
   }
 
@@ -107,8 +111,10 @@ function textByLocale(locale: Locale) {
     me: 'Вы',
     recording: 'Запись…',
     online: 'онлайн',
+    wasRecently: 'был(а) недавно',
     attachFile: 'Прикрепить файл',
     voiceMessage: 'Голосовое сообщение',
+    search: 'Поиск',
   };
 }
 
@@ -402,31 +408,20 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
 
   const getDateKey = (iso: string) => new Date(iso).toDateString();
 
+  /* ── Unread count ─────────────────────────────────────────────── */
+  const unreadCount = conversations.filter(
+    (c) => !c.isOutgoing && c.createdAt > (lastReadMap.get(c.userId) ?? ''),
+  ).length;
+
   /* ── Render ─────────────────────────────────────────────────── */
   return (
     <div className="nm-messenger" ref={containerRef}>
       {/* ── Sidebar ─────────────────────────────────────────── */}
       <aside className={`nm-msg-sidebar${isMobile && mobileView === 'chat' ? ' nm-msg-hidden' : ''}`}>
         <header className="nm-msg-sidebar-head">
-          <h1>{t.title}</h1>
+          <h1>{t.chats}</h1>
           {status ? <p className="nm-msg-status">{status}</p> : null}
         </header>
-
-        <div className="nm-msg-search-wrap">
-          <input
-            className="nm-msg-search"
-            placeholder={t.searchUsers}
-            value={search}
-            onChange={(e) => onSearch(e.target.value)}
-          />
-          <button
-            type="button"
-            className={`nm-msg-filter-btn${filtersOpen ? ' active' : ''}`}
-            onClick={() => setFiltersOpen((prev) => !prev)}
-          >
-            {t.filters} {filtersOpen ? '▲' : '▼'}
-          </button>
-        </div>
 
         {!isMobile && filtersOpen ? (
           <div className="nm-msg-filters">
@@ -446,7 +441,6 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
         ) : null}
 
         <div className="nm-msg-list-scroll">
-          <p className="nm-msg-section-label">{t.chats}</p>
           {filteredConversations.length === 0 ? <p className="nm-msg-empty">{t.noConversations}</p> : null}
           {filteredConversations.map((item) => {
             const isUnread = !item.isOutgoing && item.createdAt > (lastReadMap.get(item.userId) ?? '');
@@ -460,7 +454,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
               >
                 <span className="nm-msg-avatar-wrap">
                   {contact?.avatarUrl ? (
-                    <Image src={contact.avatarUrl} alt="" width={48} height={48} className="nm-msg-avatar" unoptimized />
+                    <Image src={contact.avatarUrl} alt="" width={54} height={54} className="nm-msg-avatar" unoptimized />
                   ) : (
                     <span className="nm-msg-avatar nm-msg-avatar-ph">{getInitial(item.userName)}</span>
                   )}
@@ -471,8 +465,11 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
                     <small>{formatTime(item.createdAt, locale)}</small>
                   </span>
                   <span className="nm-msg-contact-bottom">
-                    <span className="nm-msg-last-msg">{item.lastMessage}</span>
-                    {isUnread ? <span className="nm-msg-unread">●</span> : null}
+                    <span className="nm-msg-last-msg">
+                      {item.isOutgoing ? <span className="nm-msg-you-prefix">{t.me}: </span> : null}
+                      {item.lastMessage}
+                    </span>
+                    {isUnread ? <span className="nm-msg-unread-badge">1</span> : null}
                   </span>
                 </span>
               </button>
@@ -491,7 +488,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
                 >
                   <span className="nm-msg-avatar-wrap">
                     {item.avatarUrl ? (
-                      <Image src={item.avatarUrl} alt="" width={48} height={48} className="nm-msg-avatar" unoptimized />
+                      <Image src={item.avatarUrl} alt="" width={54} height={54} className="nm-msg-avatar" unoptimized />
                     ) : (
                       <span className="nm-msg-avatar nm-msg-avatar-ph">{getInitial(item.fullName || item.email)}</span>
                     )}
@@ -505,23 +502,45 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
             </>
           ) : null}
         </div>
+
+        {/* Search bar at bottom — Telegram style */}
+        <div className="nm-msg-search-bar">
+          <span className="nm-msg-search-icon">🔍</span>
+          <input
+            className="nm-msg-search"
+            placeholder={t.searchUsers}
+            value={search}
+            onChange={(e) => onSearch(e.target.value)}
+          />
+          <button
+            type="button"
+            className={`nm-msg-filter-btn${filtersOpen ? ' active' : ''}`}
+            onClick={() => setFiltersOpen((prev) => !prev)}
+            title={t.filters}
+          >
+            ☰
+          </button>
+        </div>
       </aside>
 
       {/* ── Thread ──────────────────────────────────────────── */}
       <section className={`nm-msg-thread${isMobile && mobileView === 'list' ? ' nm-msg-hidden' : ''}`}>
         <header className="nm-msg-thread-head">
-          {isMobile ? (
-            <button type="button" className="nm-msg-back" onClick={() => setMobileView('list')}>‹</button>
-          ) : null}
-          {selectedContact?.avatarUrl ? (
-            <Image src={selectedContact.avatarUrl} alt="" width={40} height={40} className="nm-msg-head-avatar" unoptimized />
-          ) : (
-            <span className="nm-msg-head-avatar nm-msg-avatar-ph">{getInitial(selectedName)}</span>
-          )}
-          <div className="nm-msg-head-info">
-            <strong>{selectedName || t.selectedChat}</strong>
-            {selectedId ? <small>{t.online}</small> : null}
+          <button type="button" className="nm-msg-back" onClick={() => { if (isMobile) setMobileView('list'); }}>
+            ‹{unreadCount > 0 ? <span className="nm-msg-back-badge">{unreadCount}</span> : null}
+          </button>
+          <div className="nm-msg-head-center">
+            {selectedContact?.avatarUrl ? (
+              <Image src={selectedContact.avatarUrl} alt="" width={40} height={40} className="nm-msg-head-avatar" unoptimized />
+            ) : (
+              <span className="nm-msg-head-avatar nm-msg-avatar-ph">{getInitial(selectedName)}</span>
+            )}
+            <div className="nm-msg-head-info">
+              <strong>{selectedName || t.selectedChat}</strong>
+              {selectedId ? <small>{t.wasRecently}</small> : null}
+            </div>
           </div>
+          <div className="nm-msg-head-spacer" />
         </header>
 
         <div className="nm-msg-bubbles" ref={bubblesRef}>
@@ -540,7 +559,10 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
                 <div className={`nm-msg-bubble-row${own ? ' nm-msg-own' : ''}`}>
                   <div className={`nm-msg-bubble${own ? ' nm-msg-bubble-own' : ''}`}>
                     <p>{item.content}</p>
-                    <span className="nm-msg-bubble-time">{formatTime(item.createdAt, locale)}{own ? ' ✓✓' : ''}</span>
+                    <span className="nm-msg-bubble-time">
+                      {formatTime(item.createdAt, locale)}
+                      {own ? <span className="nm-msg-checks"> ✓✓</span> : null}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -599,6 +621,7 @@ export function MessagesBoard({ locale }: { locale: Locale }) {
                 onKeyDown={onKeyDown}
                 disabled={!selectedId || sending}
               />
+              <button type="button" className="nm-msg-action-btn nm-msg-emoji-btn" title="Emoji">😊</button>
               {draft.trim() ? (
                 <button type="button" className="nm-msg-send-btn" onClick={onSend} disabled={!selectedId || sending}>➤</button>
               ) : (
