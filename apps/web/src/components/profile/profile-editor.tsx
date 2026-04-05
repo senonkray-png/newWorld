@@ -251,6 +251,9 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [form, setForm] = useState<ProfileFormState>(initialState);
+  const [isActive, setIsActive] = useState(true);
+  const [balancePai, setBalancePai] = useState<number>(0);
+  const [activationThreshold, setActivationThreshold] = useState(200);
 
   const signOutLabel = locale === 'en' ? 'Sign out' : locale === 'uk' ? 'Вийти' : 'Выйти';
 
@@ -319,6 +322,24 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
 
       setForm(nextForm);
     }
+
+    /* Fetch activation status & config */
+    const [balRes, cfgRes] = await Promise.all([
+      fetch('/api/pai/balance', { headers: { Authorization: `Bearer ${accessToken}` } }),
+      fetch('/api/pai/config'),
+    ]);
+    if (balRes.ok) {
+      const b = (await balRes.json()) as { balancePai?: number };
+      const bal = typeof b.balancePai === 'number' ? b.balancePai : 0;
+      setBalancePai(bal);
+    }
+    if (cfgRes.ok) {
+      const c = (await cfgRes.json()) as { activationPai?: number };
+      if (typeof c.activationPai === 'number') setActivationThreshold(c.activationPai);
+    }
+
+    /* Determine active status from profile response */
+    setIsActive(Boolean((payload.profile as any)?.isActive));
 
     setLoading(false);
   }, [supabase.auth]);
@@ -540,6 +561,44 @@ export function ProfileEditor({ locale }: { locale: Locale }) {
         </aside>
 
         <div className="nm-cabinet-content">
+          {!isActive ? (
+            <section
+              className="nm-register-card"
+              style={{
+                background: 'rgba(250,204,21,0.10)',
+                border: '1px solid rgba(250,204,21,0.35)',
+                marginBottom: '1rem',
+              }}
+            >
+              <h2 style={{ margin: '0 0 0.5rem' }}>
+                🔒{' '}
+                {locale === 'en'
+                  ? 'Account activation'
+                  : locale === 'uk'
+                    ? 'Активація акаунту'
+                    : 'Активация аккаунта'}
+              </h2>
+              <p style={{ margin: '0 0 0.75rem', lineHeight: 1.6 }}>
+                {locale === 'en'
+                  ? `To unlock all features (products, services, messages, contacts), top up your cooperative share balance to at least ${activationThreshold} units (${activationThreshold * 5} UAH). Your current balance: ${balancePai.toFixed(2)} units.`
+                  : locale === 'uk'
+                    ? `Для розблокування всіх функцій (товари, послуги, повідомлення, контакти) поповніть пайовий баланс мінімум на ${activationThreshold} од. (${activationThreshold * 5} грн). Ваш поточний баланс: ${balancePai.toFixed(2)} од.`
+                    : `Для разблокировки всех функций (товары, услуги, сообщения, контакты) пополните паевой баланс минимум на ${activationThreshold} ед. (${activationThreshold * 5} грн). Ваш текущий баланс: ${balancePai.toFixed(2)} ед.`}
+              </p>
+              <button
+                type="button"
+                className="nm-btn nm-btn-primary"
+                onClick={() => setActiveSection('wallet')}
+              >
+                {locale === 'en'
+                  ? '💳 Go to wallet'
+                  : locale === 'uk'
+                    ? '💳 Перейти до гаманця'
+                    : '💳 Перейти в кошелёк'}
+              </button>
+            </section>
+          ) : null}
+
           {activeSection === 'main' ? (
             <section className="nm-register-card">
               <h1>{t.sectionMainTitle}</h1>

@@ -4,6 +4,11 @@ import { getSupabaseServiceClient } from '@/lib/supabase-service';
 /** Курс: 5 грн = 1 паєва одиниця */
 export const PAI_UAH_PER_UNIT = 5;
 
+/** Мінімальний баланс для активації акаунту */
+export const ACTIVATION_PAI_THRESHOLD = Number(
+  process.env.NEXT_PUBLIC_ACTIVATION_PAI ?? 200,
+);
+
 export type PaiTxType = 'deposit' | 'transfer' | 'purchase' | 'withdrawal';
 
 export type PaiTransactionRow = {

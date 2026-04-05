@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getCoopFundConfig } from '@/lib/coop-config';
+import { ACTIVATION_PAI_THRESHOLD } from '@/lib/pai-store';
 
 /** Публічні реквізити та параметри ПК (без секретів) */
 export async function GET() {
@@ -15,5 +16,6 @@ export async function GET() {
     paymentDetails,
     entranceUah: coop.entranceUah,
     monthlyUah: coop.monthlyUah,
+    activationPai: ACTIVATION_PAI_THRESHOLD,
   });
 }

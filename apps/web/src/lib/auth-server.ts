@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getProfileByUserId } from '@/lib/profile-store';
 import { getSupabaseServiceClient } from '@/lib/supabase-service';
+import { ACTIVATION_PAI_THRESHOLD } from '@/lib/pai-store';
 
 type Viewer = {
   userId: string;
@@ -74,11 +75,13 @@ export async function requireActiveUser(
   const supabase = getSupabaseServiceClient() as ReturnType<typeof getSupabaseServiceClient>;
   const { data } = await (supabase as any)
     .from('app_users')
-    .select('is_active')
+    .select('is_active, balance_pai')
     .eq('id', viewer.userId)
     .maybeSingle();
 
-  if (!data || !data.is_active) {
+  const active = data?.is_active || (Number(data?.balance_pai) >= ACTIVATION_PAI_THRESHOLD);
+
+  if (!active) {
     return NextResponse.json(
       { error: 'account_inactive', message: 'Activate your account to use this feature' },
       { status: 403 },

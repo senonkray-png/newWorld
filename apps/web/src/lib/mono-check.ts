@@ -178,7 +178,7 @@ export async function runMonoCheck(): Promise<{ matched: number; manual: number;
           const newBalance = (Number(currentUser.balance_pai) || 0) + amountPai;
           await supabase
             .from('app_users')
-            .update({ balance_pai: newBalance, is_active: newBalance > 0 })
+            .update({ balance_pai: newBalance, is_active: newBalance >= 200 })
             .eq('id', user.id);
         }
 
