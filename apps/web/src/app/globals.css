@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
 :root {
   color-scheme: light;
   --nm-bg: #dfe2e6;
@@ -9,31 +11,117 @@
   --nm-card: #ffffff;
   --nm-muted: #edf1f4;
   --nm-shadow: 0 24px 48px rgba(17, 26, 30, 0.12);
+  --nm-radius: 0.625rem;
+  --nm-transition: 0.2s ease;
+  --nm-focus: rgba(82, 115, 88, 0.45);
+  --nm-success: #16a34a;
+  --nm-success-bg: rgba(22, 163, 74, 0.1);
+  --nm-danger: #dc2626;
+  --nm-danger-bg: rgba(220, 38, 38, 0.1);
+  --nm-warning: #d97706;
+  --nm-warning-bg: rgba(217, 119, 6, 0.1);
+  --nm-info: #2563eb;
+  --nm-info-bg: rgba(37, 99, 235, 0.1);
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* ── Scrollbar (from project) ───────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(17, 26, 30, 0.14); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(17, 26, 30, 0.28); }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
 html {
   scroll-behavior: smooth;
+  font-size: 16px;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   overflow-x: hidden;
-  font-family: Montserrat, 'Segoe UI', sans-serif;
+  font-family: Inter, Montserrat, 'Segoe UI', sans-serif;
   color: var(--nm-ink);
   background:
     radial-gradient(circle at 8% 10%, rgba(255, 255, 255, 0.8), transparent 36%),
     radial-gradient(circle at 92% 12%, rgba(255, 255, 255, 0.5), transparent 40%),
     linear-gradient(180deg, #cfd5db 0%, #dde2e6 48%, #d3d8dd 100%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* ── Global smooth transitions (from project) ──────────────────── */
+button, a, input, textarea, select {
+  transition: background var(--nm-transition), color var(--nm-transition),
+              border-color var(--nm-transition), box-shadow var(--nm-transition),
+              opacity var(--nm-transition);
+}
+
+/* ── Focus ring (from project) ──────────────────────────────────── */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--nm-primary);
+  box-shadow: 0 0 0 3px var(--nm-focus);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--nm-primary);
+  outline-offset: 2px;
+}
+
+/* ── Serif headings (from project: Playfair Display) ────────────── */
+.nm-hero-body h1,
+.nm-section-title {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* ── Status badges (from project semantic pattern) ──────────────── */
+.nm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.nm-badge-success {
+  background: var(--nm-success-bg);
+  color: var(--nm-success);
+}
+
+.nm-badge-danger {
+  background: var(--nm-danger-bg);
+  color: var(--nm-danger);
+}
+
+.nm-badge-warning {
+  background: var(--nm-warning-bg);
+  color: var(--nm-warning);
+}
+
+.nm-badge-info {
+  background: var(--nm-info-bg);
+  color: var(--nm-info);
+}
+
+.nm-badge-neutral {
+  background: var(--nm-muted);
+  color: var(--nm-soft-ink);
 }
 
 .nm-page {
@@ -305,6 +393,7 @@ a {
   display: grid;
   gap: 8px;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  animation: nmSlideUp 200ms ease;
 }
 
 .nm-notification-item {
@@ -364,6 +453,7 @@ a {
   flex-direction: column;
   gap: 2px;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  animation: nmSlideUp 180ms ease;
 }
 
 .nm-dropdown-menu--right {
@@ -452,20 +542,34 @@ a {
   font-weight: 600;
   font-size: clamp(0.82rem, 1.8vw, 1rem);
   cursor: pointer;
+  transition: background var(--nm-transition), color var(--nm-transition),
+              border-color var(--nm-transition), box-shadow var(--nm-transition),
+              transform 0.15s ease;
+}
+
+.nm-btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .nm-btn-primary {
   background: var(--nm-primary);
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(82, 115, 88, 0.25);
 }
 
 .nm-btn-primary:hover {
   background: var(--nm-primary-strong);
+  box-shadow: 0 6px 20px rgba(52, 81, 59, 0.35);
 }
 
 .nm-btn-secondary {
   background: #ffffff;
   border-color: var(--nm-line);
+}
+
+.nm-btn-secondary:hover {
+  border-color: var(--nm-soft-ink);
+  background: var(--nm-muted);
 }
 
 .nm-card-grid,
@@ -500,6 +604,14 @@ a {
   border-radius: clamp(12px, 2vw, 16px);
   padding: clamp(12px, 2vw, 18px);
   box-shadow: 0 8px 24px rgba(17, 26, 30, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.nm-panel:hover,
+.nm-process-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(17, 26, 30, 0.12);
+  border-color: rgba(82, 115, 88, 0.25);
 }
 
 .nm-panel h3,
@@ -537,6 +649,12 @@ a {
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid var(--nm-line);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.nm-story:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(17, 26, 30, 0.12);
 }
 
 .nm-story-image {
@@ -957,6 +1075,12 @@ a {
   border-radius: 12px;
   padding: 12px;
   background: var(--nm-muted);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.nm-partner-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(17, 26, 30, 0.1);
 }
 
 .nm-partner-card h3 {
@@ -1035,6 +1159,13 @@ a {
   border-radius: 12px;
   background: #ffffff;
   padding: 12px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.nm-market-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(17, 26, 30, 0.1);
+  border-color: rgba(82, 115, 88, 0.2);
 }
 
 .nm-market-card-head {
@@ -1111,11 +1242,13 @@ a {
 .nm-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(11, 20, 24, 0.48);
+  background: rgba(11, 20, 24, 0.55);
+  backdrop-filter: blur(4px);
   z-index: 400;
   display: grid;
   place-items: center;
   padding: clamp(8px, 2vw, 16px);
+  animation: nmFadeIn 200ms ease;
 }
 
 .nm-modal {
@@ -1126,7 +1259,13 @@ a {
   border: 1px solid var(--nm-line);
   border-radius: clamp(12px, 2vw, 16px);
   padding: clamp(12px, 2vw, 16px);
-  box-shadow: var(--nm-shadow);
+  box-shadow: 0 32px 64px rgba(17, 26, 30, 0.2);
+  animation: nmSlideUp 300ms ease;
+}
+
+@keyframes nmSlideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .nm-modal h3 {
@@ -1277,6 +1416,29 @@ a {
   animation: nmReveal 650ms ease both;
 }
 
+/* Stagger delays for grid children (from project pattern) */
+.nm-reveal:nth-child(1) { animation-delay: 0ms; }
+.nm-reveal:nth-child(2) { animation-delay: 50ms; }
+.nm-reveal:nth-child(3) { animation-delay: 100ms; }
+.nm-reveal:nth-child(4) { animation-delay: 150ms; }
+.nm-reveal:nth-child(5) { animation-delay: 200ms; }
+.nm-reveal:nth-child(6) { animation-delay: 250ms; }
+.nm-reveal:nth-child(7) { animation-delay: 300ms; }
+.nm-reveal:nth-child(8) { animation-delay: 350ms; }
+
+/* Utility animations (from project) */
+.nm-animate-pulse {
+  animation: nmPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.nm-animate-spin {
+  animation: nmSpin 1s linear infinite;
+}
+
+.nm-fade-in {
+  animation: nmFadeIn 300ms ease both;
+}
+
 @keyframes nmReveal {
   from {
     transform: translateY(18px);
@@ -1285,6 +1447,32 @@ a {
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@keyframes nmPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes nmSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes nmFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── XL breakpoint (from project: ≤1280px) ─────────────────────── */
+@media (max-width: 1280px) {
+  .nm-grid-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nm-market-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   }
 }
 
@@ -1628,6 +1816,63 @@ a {
   }
 }
 
+/* ── SM breakpoint (from project: ≤640px) ──────────────────────── */
+@media (max-width: 640px) {
+  .nm-grid-4,
+  .nm-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-hero {
+    min-height: 320px;
+    border-radius: 14px;
+  }
+
+  .nm-hero-body h1 {
+    font-size: clamp(1.5rem, 6vw, 2.4rem);
+  }
+
+  .nm-section-title {
+    font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+  }
+
+  .nm-partner-list {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-register-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-profile-view-grid,
+  .nm-profile-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-market-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-admin-subtabs {
+    gap: 3px;
+    padding: 0 10px;
+  }
+
+  .nm-admin-subtab {
+    padding: 5px 10px;
+    font-size: 0.76rem;
+  }
+
+  /* Disable card hover lift on touch */
+  .nm-panel:hover,
+  .nm-process-card:hover,
+  .nm-market-card:hover,
+  .nm-story:hover,
+  .nm-partner-card:hover {
+    transform: none;
+  }
+}
+
 @media (max-width: 520px) {
   .nm-site-title {
     display: none;
@@ -1955,8 +2200,24 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nm-reveal {
+  .nm-reveal,
+  .nm-animate-pulse,
+  .nm-animate-spin,
+  .nm-fade-in {
     animation: none;
+  }
+
+  .nm-panel:hover,
+  .nm-process-card:hover,
+  .nm-market-card:hover,
+  .nm-story:hover,
+  .nm-partner-card:hover,
+  .nm-card-interactive:hover {
+    transform: none;
+  }
+
+  button, a, input, textarea, select {
+    transition: none;
   }
 }
 
